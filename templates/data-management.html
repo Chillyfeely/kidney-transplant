@@ -1,0 +1,116 @@
+{% extends 'rebase.html' %} 
+{% block stylesheets %}{% endblock %}
+
+<!-- ===============================================-->
+<!--    Page Content-->
+<!-- ===============================================-->
+{% block page_content %}
+<div class="container mt-4 border border-primary" style="width: 80%; border-radius: 20px;">
+  <div class="table-responsive scrollbar">
+    <table class="table table-striped overflow-hidden">
+      <thead>
+        <tr class="btn-reveal-trigger">
+          <th scope="col">Ad</th>
+          <th scope="col">Soyad</th>
+          <th scope="col">Doğum Tarihi</th>
+          <th scope="col">Tip</th>
+          <th class="text-end" scope="col">Aksiyonlar</th>
+        </tr>
+      </thead>
+      <tbody id="registersTableBody">
+        <!-- Rows will be populated here by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+<!-- ===============================================-->
+<!--   End of Page Content-->
+<!-- ===============================================-->
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/db/get-all-registers")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status) {
+          const tableBody = document.getElementById("registersTableBody");
+
+          // Process donors
+          data.all_registers.donors.forEach((register) => {
+            const row = document.createElement("tr");
+            row.classList.add("btn-reveal-trigger");
+            row.innerHTML = `
+              <td>${register.name}</td>
+              <td>${register.surname}</td>
+              <td>${register.birthdate}</td>
+              <td>Donor</td>
+              <td class="text-end">
+                <div class="dropdown font-sans-serif position-static">
+                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs-10"></span></button>
+                  <div class="dropdown-menu dropdown-menu-end border py-0">
+                    <div class="py-2">
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Donor')">Delete</a>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+
+          // Process patients
+          data.all_registers.patients.forEach((register) => {
+            const row = document.createElement("tr");
+            row.classList.add("btn-reveal-trigger");
+            row.innerHTML = `
+              <td>${register.name}</td>
+              <td>${register.surname}</td>
+              <td>${register.birthdate}</td>
+              <td>Patient</td>
+              <td class="text-end">
+                <div class="dropdown font-sans-serif position-static">
+                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs-10"></span></button>
+                  <div class="dropdown-menu dropdown-menu-end border py-0">
+                    <div class="py-2">
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Patient')">Delete</a>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          console.error("Error fetching registers:", data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+
+  function deleteRegister(name, surname, birthdate, type) {
+    fetch("/db/delete-register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, surname, birthdate, type }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status) {
+          location.reload();
+        } else {
+          console.error("Error deleting register:", data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,311 @@
+{% extends 'rebase.html' %} {% block stylesheets %}
+<style>
+  :root {
+  --arrow-color: var(--falcon-primary-text-emphasis);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --arrow-color: var(--falcon-primary-text-emphasis);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --arrow-color: var(--falcon-primary-text-emphasis);
+  }
+}
+  .cards-wrapper {
+    position: relative;
+  }
+  .arrows-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+</style>
+{% endblock %} {% block page_content %}
+<div class="container mt-4 cards-wrapper">
+  <div class="row">
+    <div class="col-md-5" id="donors-container">
+      <h3 class="mb-3">Donörler (Vericiler)</h3>
+    </div>
+    <div class="col-md-2" id="arrows-container">
+      <!-- SVG overlay for arrows will be inserted here -->
+    </div>
+    <div class="col-md-5" id="patients-container">
+      <h3 class="mb-3">Hastalar (Alıcılar)</h3>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    async function fetchData(url, key) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.status) {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+          return data[key];
+        } else {
+          console.error(`Failed to fetch ${key}:`, data.message);
+        }
+      } catch (error) {
+        console.error(`Error fetching ${key}:`, error);
+      }
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    function createBadges(value) {
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        return `<span class="badge rounded-pill badge-subtle-warning">Yok</span>`;
+      }
+      if (Array.isArray(value)) {
+        return value.map(item => `<span class="badge rounded-pill badge-subtle-info">${item}</span>`).join(" ");
+      }
+      return `<span class="badge rounded-pill badge-subtle-info">${value}</span>`;
+    }
+
+    function createDonorCard(data) {
+      const card = document.createElement("div");
+      card.className = "card donor-card mb-4 border border-primary";
+      card.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title">${data.name} ${data.surname}</h5>
+          <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(data["blood-type"])}</p>
+          <p class="card-text"><strong>HLA-A Antijen:</strong> ${createBadges(data["hla-a-antigen"])}</p>
+          <p class="card-text"><strong>HLA-B Antijen:</strong> ${createBadges(data["hla-b-antigen"])}</p>
+          <p class="card-text"><strong>HLA-DR Antijen:</strong> ${createBadges(data["hla-dr-antigen"])}</p>
+          <p class="card-text"><strong>HLA-DQ Antijen:</strong> ${createBadges(data["hla-dq-antigen"])}</p>
+        </div>`;
+      return card;
+    }
+
+    function createPatientCard(data) {
+      const card = document.createElement("div");
+      card.className = "card patient-card mb-4 border border-primary";
+      card.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title">${data.name} ${data.surname}</h5>
+          <p class="card-text"><strong>Doğum Tarihi:</strong> ${data.birthdate}</p>
+          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(data["blood-type"])}</p>
+          <p class="card-text"><strong>HLA-A Antikor:</strong> ${createBadges(data["hla-a-antibody"])}</p>
+          <p class="card-text"><strong>HLA-B Antikor:</strong> ${createBadges(data["hla-b-antibody"])}</p>
+          <p class="card-text"><strong>HLA-DR Antikor:</strong> ${createBadges(data["hla-dr-antibody"])}</p>
+          <p class="card-text"><strong>HLA-DQ Antikor:</strong> ${createBadges(data["hla-dq-antibody"])}</p>
+        </div>`;
+      return card;
+    }
+
+    function canDonate(donor, patient) {
+      const organCompatibility = {
+        A: ["A", "AB"],
+        B: ["B", "AB"],
+        AB: ["AB"],
+        O: ["A", "B", "AB", "O"],
+      };
+
+      const donorType = donor["blood-type"].replace(/[+-]/g, "");
+      const patientType = patient["blood-type"].replace(/[+-]/g, "");
+
+      if (!organCompatibility[donorType].includes(patientType)) {
+        return false;
+      }
+
+      const antigens = [
+        "hla-a-antigen",
+        "hla-b-antigen",
+        "hla-dr-antigen",
+        "hla-dq-antigen",
+      ];
+      const antibodies = [
+        "hla-a-antibody",
+        "hla-b-antibody",
+        "hla-dr-antibody",
+        "hla-dq-antibody",
+      ];
+
+      for (let i = 0; i < antigens.length; i++) {
+        const antigen = donor[antigens[i]];
+        const antibody = patient[antibodies[i]];
+
+        if (Array.isArray(antigen)) {
+          for (const a of antigen) {
+            if (
+              Array.isArray(antibody) ? antibody.includes(a) : antibody === a
+            ) {
+              return false;
+            }
+          }
+        } else if (antigen) {
+          if (
+            Array.isArray(antibody)
+              ? antibody.includes(antigen)
+              : antibody === antigen
+          ) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function displayCards(data, containerId, createCardFunction) {
+      const container = document.getElementById(containerId);
+      data.forEach((item) => {
+        const card = createCardFunction(item);
+        container.appendChild(card);
+      });
+    }
+
+    function computeOptimalMatches(donors, patients) {
+      const graph = donors.map((donor, i) => {
+        const possiblePatients = [];
+        patients.forEach((patient, j) => {
+          if (canDonate(donor, patient)) {
+            possiblePatients.push(j);
+          }
+        });
+        return possiblePatients;
+      });
+
+      // Log all possible matches
+      console.log("All possible matches:");
+      graph.forEach((possiblePatients, donorIndex) => {
+        possiblePatients.forEach(patientIndex => {
+          console.log(`Donor ${donorIndex} can donate to Patient ${patientIndex}`);
+        });
+      });
+
+      const matchR = Array(patients.length).fill(-1);
+
+      function bpm(u, seen) {
+        for (let v of graph[u]) {
+          if (!seen[v]) {
+            seen[v] = true;
+            if (matchR[v] === -1 || bpm(matchR[v], seen)) {
+              matchR[v] = u;
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      // For each donor, try to find a matching patient.
+      for (let u = 0; u < donors.length; u++) {
+        const seen = Array(patients.length).fill(false);
+        bpm(u, seen);
+      }
+
+      // Build an array of matching pairs.
+      const matches = [];
+      for (let v = 0; v < patients.length; v++) {
+        if (matchR[v] !== -1) {
+          matches.push({ donorIndex: matchR[v], patientIndex: v });
+        }
+      }
+      return matches;
+    }
+
+    function createSVGOverlay() {
+      const arrowsContainer = document.getElementById("arrows-container");
+      const arrowColor = getComputedStyle(document.documentElement).getPropertyValue('--arrow-color').trim();
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.classList.add("arrows-overlay");
+      const wrapper = document.querySelector(".cards-wrapper");
+      const rect = wrapper.getBoundingClientRect();
+      svg.setAttribute("width", rect.width);
+      svg.setAttribute("height", rect.height);
+      const defs = document.createElementNS(svgNS, "defs");
+      const marker = document.createElementNS(svgNS, "marker");
+      marker.setAttribute("id", "arrowhead");
+      marker.setAttribute("markerWidth", "10");
+      marker.setAttribute("markerHeight", "7");
+      marker.setAttribute("refX", "10");
+      marker.setAttribute("refY", "3.5");
+      marker.setAttribute("orient", "auto");
+      const polygon = document.createElementNS(svgNS, "polygon");
+      polygon.setAttribute("points", "0 0, 10 3.5, 0 7");
+      polygon.setAttribute("fill", arrowColor);
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      arrowsContainer.innerHTML = "";
+      arrowsContainer.appendChild(svg);
+      return svg;
+    }
+
+    function drawOptimalArrows(donorsData, patientsData, svg) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const donorCards = document.querySelectorAll(
+        "#donors-container .donor-card"
+      );
+      const patientCards = document.querySelectorAll(
+        "#patients-container .patient-card"
+      );
+
+      const matches = computeOptimalMatches(donorsData, patientsData);
+      const arrowColor = getComputedStyle(document.documentElement).getPropertyValue('--arrow-color').trim();
+
+      matches.forEach((match) => {
+        const donorCard = donorCards[match.donorIndex];
+        const patientCard = patientCards[match.patientIndex];
+
+        const donorRect = donorCard.getBoundingClientRect();
+        const patientRect = patientCard.getBoundingClientRect();
+        const wrapperRect = document
+          .querySelector(".cards-wrapper")
+          .getBoundingClientRect();
+
+        const startX = donorRect.right - wrapperRect.left;
+        const startY = donorRect.top + donorRect.height / 2 - wrapperRect.top;
+        const endX = patientRect.left - wrapperRect.left;
+        const endY = patientRect.top + patientRect.height / 2 - wrapperRect.top;
+
+        const line = document.createElementNS(svgNS, "line");
+        line.setAttribute("x1", startX);
+        line.setAttribute("y1", startY);
+        line.setAttribute("x2", endX);
+        line.setAttribute("y2", endY);
+        line.setAttribute("stroke", arrowColor);
+        line.setAttribute("stroke-width", "2");
+        line.setAttribute("marker-end", "url(#arrowhead)");
+        svg.appendChild(line);
+      });
+    }
+
+    const donors = await fetchData("/db/get-donors", "donors");
+    const patients = await fetchData("/db/get-patients", "patients");
+
+    if (donors) displayCards(donors, "donors-container", createDonorCard);
+    if (patients)
+      displayCards(patients, "patients-container", createPatientCard);
+
+    function updateArrows() {
+      if (donors && patients) {
+        const svg = createSVGOverlay();
+        drawOptimalArrows(donors, patients, svg);
+      }
+    }
+
+    setTimeout(updateArrows, 100);
+
+    window.addEventListener('resize', updateArrows);
+  });
+</script>
+{% endblock %}

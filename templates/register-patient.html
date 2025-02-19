@@ -1,0 +1,276 @@
+{% extends 'rebase.html' %} {% block stylesheets %}{% endblock %}
+
+<!-- ===============================================-->
+<!--    Page Content-->
+<!-- ===============================================-->
+{% block page_content %}
+<div class="container">
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h4 class="mb-0">Hasta Bilgileri</h4>
+        </div>
+
+        <div class="card-body bg-body-tertiary">
+          <!-- Note: Remove the "onclick" from the button because we’ll handle submission via the form submit event -->
+          <form id="donorForm" class="needs-validation" novalidate>
+            <div class="container mt-3">
+              <h5 class="text-center">Kişisel Bilgiler</h5>
+              <div class="row gx-2">
+                <!-- Name Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="name">Ad</label>
+                  <input
+                    class="form-control"
+                    id="name"
+                    type="text"
+                    name="name"
+                    placeholder="Ad"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın adını giriniz.
+                  </div>
+                </div>
+
+                <!-- Surname Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="surname">Soyad</label>
+                  <input
+                    class="form-control"
+                    id="surname"
+                    type="text"
+                    name="surname"
+                    placeholder="Soyad"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın soyadını giriniz.
+                  </div>
+                </div>
+
+                <!-- Birthdate Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="birthdate">Doğum Tarihi</label>
+                  <input
+                    class="form-control"
+                    id="birthdate"
+                    type="date"
+                    name="birthdate"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen geçerli bir doğum tarihi giriniz.
+                  </div>
+                </div>
+
+                <!-- Blood Type Field -->
+                <div class="col-sm-6">
+                  <label class="form-label" for="blood-type">Kan Grubu</label>
+                  <select
+                    class="form-select"
+                    id="blood-type"
+                    name="blood-type"
+                    required
+                  >
+                    <option value="" selected disabled>Seçiniz...</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Lütfen hastanın kan grubunu seçiniz.
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="border-bottom border-dashed my-3"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HLA-Antikor Bilgileri (example for one tab; do similar for others) -->
+            <div class="container mt-3">
+              <h5 class="text-center">HLA-Antikor Bilgileri</h5>
+              <!-- HLA-A Antibodies -->
+              <div
+                class="tab-pane preview-tab-pane active"
+                role="tabpanel"
+                aria-labelledby="antibodiesA"
+                id="antibodiesA"
+              >
+                <label for="antibodyChoserA">HLA-A Antikorları</label>
+                <select
+                  class="form-select js-choice"
+                  id="antibodyChoserA"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-a-antibody"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antikorları seçiniz...</option>
+                </select>
+              </div>
+
+              <!-- HLA-B Antibodies -->
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="antibodiesB"
+                id="antibodiesB"
+              >
+                <label for="antibodyChoserB">HLA-B Antikorları</label>
+                <select
+                  class="form-select js-choice"
+                  id="antibodyChoserB"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-b-antibody"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antikorları seçiniz...</option>
+                </select>
+              </div>
+
+              <!-- HLA-DR Antibodies -->
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="antibodiesDR"
+                id="antibodiesDR"
+              >
+                <label for="antibodyChoserDR">HLA-DR Antikorları</label>
+                <select
+                  class="form-select js-choice"
+                  id="antibodyChoserDR"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-dr-antibody"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antikorları seçiniz...</option>
+                </select>
+              </div>
+
+              <!-- HLA-DQ Antibodies -->
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="antibodiesDQ"
+                id="antibodiesDQ"
+              >
+                <label for="antibodyChoserDQ">HLA-DQ Antikorları</label>
+                <select
+                  class="form-select js-choice"
+                  id="antibodyChoserDQ"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-dq-antibody"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antikorları seçiniz...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <button class="btn btn-primary" type="submit">Kaydet</button>
+            </div>
+          </form>
+          <div id="alertPlaceholder"></div>
+        </div>
+      </div>
+      {% endblock %}
+
+      <!-- ===============================================-->
+      <!--   End of Page Content-->
+      <!-- ===============================================-->
+
+      {% block scripts %}
+      <script src="{{ url_for('static', filename='vendors/choices/choices.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='vendors/prism/prism.js') }}"></script>
+      <script>
+        function populateOptions(selectId, prefix, count) {
+          const select = document.getElementById(selectId);
+          for (let i = 1; i <= count; i++) {
+            const option = document.createElement("option");
+            option.value = `${prefix}${i.toString().padStart(2, "0")}`;
+            option.textContent = `${prefix}${i.toString().padStart(2, "0")}`;
+            select.appendChild(option);
+          }
+        }
+        populateOptions("antibodyChoserA", "A*", 99);
+        populateOptions("antibodyChoserB", "B*", 99);
+        populateOptions("antibodyChoserDR", "DRB1*", 99);
+        populateOptions("antibodyChoserDQ", "DQB1*", 99);
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const form = document.getElementById("donorForm");
+
+          form.addEventListener("submit", function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            } else {
+              event.preventDefault();
+              submitForm();
+            }
+            form.classList.add("was-validated");
+          });
+        });
+
+        function submitForm() {
+          const form = document.getElementById("donorForm");
+          const formData = new FormData(form);
+
+          const data = {};
+          formData.forEach((value, key) => {
+            if (key !== "search_terms") {
+              if (!data[key]) {
+                data[key] = value;
+              } else {
+                if (!Array.isArray(data[key])) {
+                  data[key] = [data[key]];
+                }
+                data[key].push(value);
+              }
+            }
+          });
+
+          fetch("/db/register-patient", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              showAlert("Hasta başarıyla veritabanına eklendi!", "success");
+              form.reset();
+              form.classList.remove("was-validated");
+            })
+            .catch((error) => {
+              showAlert("Bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyiniz.", "danger");
+              console.error("Error:", error);
+            });
+        }
+
+        function showAlert(message, type) {
+          const alertPlaceholder = document.getElementById("alertPlaceholder");
+          const alert = document.createElement("div");
+          alert.className = `alert alert-${type} alert-dismissible fade show`;
+          alert.role = "alert";
+          alert.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+          alertPlaceholder.appendChild(alert);
+        }
+      </script>
+      {% endblock %}
+    </div>
+  </div>
+</div>
