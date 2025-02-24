@@ -5,22 +5,34 @@
 <!--    Page Content-->
 <!-- ===============================================-->
 {% block page_content %}
-<div class="container mt-4 border border-primary" style="width: 80%; border-radius: 20px;">
-  <div class="table-responsive scrollbar">
-    <table class="table table-striped overflow-hidden">
-      <thead>
-        <tr class="btn-reveal-trigger">
-          <th scope="col">Ad</th>
-          <th scope="col">Soyad</th>
-          <th scope="col">Doğum Tarihi</th>
-          <th scope="col">Tip</th>
-          <th class="text-end" scope="col">Aksiyonlar</th>
-        </tr>
-      </thead>
-      <tbody id="registersTableBody">
-        <!-- Rows will be populated here by JavaScript -->
-      </tbody>
-    </table>
+<div class="container mt-4" style="width: 80%; border-radius: 20px;">
+  <div class="card border border-primary">
+    <div class="card-header">
+      <h3 class="mb-0 text-center"><strong>Veri Tabanı</strong></h3>
+    </div>
+    <div class="card-body">
+
+      <div class="table-responsive scrollbar">
+        <table class="table table-striped overflow-hidden">
+          <thead>
+            <tr class="btn-reveal-trigger">
+              <th scope="col">Ad</th>
+              <th scope="col">Soyad</th>
+              <th scope="col">Doğum Tarihi</th>
+              <th scope="col">Kan Grubu</th>
+              <th scope="col">Kilo</th>
+              <th scope="col">Boy</th>
+              <th scope="col">Meslek</th>
+              <th scope="col">Kayıt Tipi</th>
+              <th class="text-end" scope="col">Aksiyonlar</th>
+            </tr>
+          </thead>
+          <tbody id="registersTableBody">
+            <!-- Rows will be populated here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -46,13 +58,19 @@
               <td>${register.name}</td>
               <td>${register.surname}</td>
               <td>${register.birthdate}</td>
-              <td>Donor</td>
+              <td>${register["blood-type"]}</td>
+              <td>${register.weight}</td>
+              <td>${register.height}</td>
+              <td>${register.occupation}</td>
+              <td>Donör</td>
               <td class="text-end">
                 <div class="dropdown font-sans-serif position-static">
-                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs-10"></span></button>
+                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false">
+                    <span class="fas fa-ellipsis-h fs-10"></span>
+                  </button>
                   <div class="dropdown-menu dropdown-menu-end border py-0">
                     <div class="py-2">
-                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Donor')">Delete</a>
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Donor')">Sil</a>
                     </div>
                   </div>
                 </div>
@@ -69,13 +87,19 @@
               <td>${register.name}</td>
               <td>${register.surname}</td>
               <td>${register.birthdate}</td>
-              <td>Patient</td>
+              <td>${register["blood-type"]}</td>
+              <td>${register.weight} kg</td>
+              <td>${register.height} cm</td>
+              <td>${register.occupation}</td>
+              <td>Hasta</td>
               <td class="text-end">
                 <div class="dropdown font-sans-serif position-static">
-                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs-10"></span></button>
+                  <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false">
+                    <span class="fas fa-ellipsis-h fs-10"></span>
+                  </button>
                   <div class="dropdown-menu dropdown-menu-end border py-0">
                     <div class="py-2">
-                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Patient')">Delete</a>
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Patient')">Sil</a>
                     </div>
                   </div>
                 </div>

@@ -5,22 +5,16 @@ website_bp = Blueprint("website", __name__, template_folder="templates")
 
 @website_bp.route("/")
 def index():
-    return redirect("/matches")
+    return redirect("/register-tuple")
 
 
 @website_bp.route("/matches")
 def matches():
     return render_template("matches.html")
 
-
-@website_bp.route("/register-patient")
-def register_patient():
-    return render_template("register-patient.html")
-
-
-@website_bp.route("/register-donor")
-def register_donor():
-    return render_template("register-donor.html")
+@website_bp.route("/register-tuple")
+def register_tuple():
+    return render_template("register-tuple.html")
 
 @website_bp.route("/data-management")
 def data_management():
