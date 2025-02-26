@@ -1,20 +1,20 @@
 {% extends 'rebase.html' %} {% block stylesheets %}
 <style>
   :root {
-  --arrow-color: var(--falcon-primary-text-emphasis);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
     --arrow-color: var(--falcon-primary-text-emphasis);
   }
-}
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --arrow-color: var(--falcon-primary-text-emphasis);
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --arrow-color: var(--falcon-primary-text-emphasis);
+    }
   }
-}
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --arrow-color: var(--falcon-primary-text-emphasis);
+    }
+  }
   .cards-wrapper {
     position: relative;
   }
@@ -34,10 +34,10 @@
     <div class="col-md-5" id="donors-container">
       <h3 class="mb-3">Donörler (Vericiler)</h3>
     </div>
-    <div class="col-md-2" id="arrows-container">
+    <div class="col-md-1" id="arrows-container">
       <!-- SVG overlay for arrows will be inserted here -->
     </div>
-    <div class="col-md-5" id="patients-container">
+    <div class="col-md-6" id="patients-container">
       <h3 class="mb-3">Hastalar (Alıcılar)</h3>
     </div>
   </div>
@@ -62,8 +62,8 @@
 
     function formatDate(dateString) {
       const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
       return `${day}-${month}-${year}`;
     }
@@ -73,7 +73,12 @@
         return `<span class="badge rounded-pill badge-subtle-warning">Yok</span>`;
       }
       if (Array.isArray(value)) {
-        return value.map(item => `<span class="badge rounded-pill badge-subtle-info">${item}</span>`).join(" ");
+        return value
+          .map(
+            (item) =>
+              `<span class="badge rounded-pill badge-subtle-info">${item}</span>`
+          )
+          .join(" ");
       }
       return `<span class="badge rounded-pill badge-subtle-info">${value}</span>`;
     }
@@ -84,12 +89,24 @@
       card.innerHTML = `
         <div class="card-body">
           <h5 class="card-title">${data.name} ${data.surname}</h5>
-          <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
-          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(data["blood-type"])}</p>
-          <p class="card-text"><strong>HLA-A Antijen:</strong> ${createBadges(data["hla-a-antigen"])}</p>
-          <p class="card-text"><strong>HLA-B Antijen:</strong> ${createBadges(data["hla-b-antigen"])}</p>
-          <p class="card-text"><strong>HLA-DR Antijen:</strong> ${createBadges(data["hla-dr-antigen"])}</p>
-          <p class="card-text"><strong>HLA-DQ Antijen:</strong> ${createBadges(data["hla-dq-antigen"])}</p>
+          <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
+            data.birthdate
+          )}</p>
+          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(
+            data["blood-type"]
+          )}</p>
+          <p class="card-text"><strong>HLA-A Antijen:</strong> ${createBadges(
+            data["hla-a-antigen"]
+          )}</p>
+          <p class="card-text"><strong>HLA-B Antijen:</strong> ${createBadges(
+            data["hla-b-antigen"]
+          )}</p>
+          <p class="card-text"><strong>HLA-DR Antijen:</strong> ${createBadges(
+            data["hla-dr-antigen"]
+          )}</p>
+          <p class="card-text"><strong>HLA-DQ Antijen:</strong> ${createBadges(
+            data["hla-dq-antigen"]
+          )}</p>
         </div>`;
       return card;
     }
@@ -100,14 +117,61 @@
       card.innerHTML = `
         <div class="card-body">
           <h5 class="card-title">${data.name} ${data.surname}</h5>
-          <p class="card-text"><strong>Doğum Tarihi:</strong> ${data.birthdate}</p>
-          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(data["blood-type"])}</p>
-          <p class="card-text"><strong>HLA-A Antikor:</strong> ${createBadges(data["hla-a-antibody"])}</p>
-          <p class="card-text"><strong>HLA-B Antikor:</strong> ${createBadges(data["hla-b-antibody"])}</p>
-          <p class="card-text"><strong>HLA-DR Antikor:</strong> ${createBadges(data["hla-dr-antibody"])}</p>
-          <p class="card-text"><strong>HLA-DQ Antikor:</strong> ${createBadges(data["hla-dq-antibody"])}</p>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="card-text"><strong>Doğum Tarihi:</strong> ${
+                data.birthdate
+              }</p>
+              <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(
+                data["blood-type"]
+              )}</p>
+              <p class="card-text"><strong>HLA-A Antikor:</strong> ${createBadges(
+                data["hla-a-antibody"]
+              )}</p>
+              <p class="card-text"><strong>HLA-B Antikor:</strong> ${createBadges(
+                data["hla-b-antibody"]
+              )}</p>
+              <p class="card-text"><strong>HLA-DR Antikor:</strong> ${createBadges(
+                data["hla-dr-antibody"]
+              )}</p>
+              <p class="card-text"><strong>HLA-DQ Antikor:</strong> ${createBadges(
+                data["hla-dq-antibody"]
+              )}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="card-text"><strong>LSA-A Antikor:</strong> ${createBadges(
+                data["lsa1-A"]
+              )}</p>
+              <p class="card-text"><strong>LSA-B Antikor:</strong> ${createBadges(
+                data["lsa1-B"]
+              )}</p>
+              <p class="card-text"><strong>LSA-C Antikor:</strong> ${createBadges(
+                data["lsa1-C"]
+              )}</p>
+              <p class="card-text"><strong>LSA-DRB1 Antikor:</strong> ${createBadges(
+                data["lsa2-DRB1"]
+              )}</p>
+              <p class="card-text"><strong>LSA-DQB1 Antikor:</strong> ${createBadges(
+                data["lsa2-DQB1"]
+              )}</p>
+              <p class="card-text"><strong>LSA-DRB2 Antikor:</strong> ${createBadges(
+                data["lsa2-DQB2"]
+              )}</p>
+            </div>
+          </div>
         </div>`;
       return card;
+    }
+
+    function valueMatch(a, b) {
+      if (!a || !b) return false;
+      if (Array.isArray(a)) {
+        if (Array.isArray(b)) return a.some((x) => b.includes(x));
+        return a.includes(b);
+      } else {
+        if (Array.isArray(b)) return b.includes(a);
+        return a === b;
+      }
     }
 
     function canDonate(donor, patient) {
@@ -118,51 +182,40 @@
         O: ["A", "B", "AB", "O"],
       };
 
-      const donorType = donor["blood-type"].replace(/[+-]/g, "");
-      const patientType = patient["blood-type"].replace(/[+-]/g, "");
+      const donorType = donor["blood-type"].replace(/ Rh[+-]/, "");
+      const patientType = patient["blood-type"].replace(/ Rh[+-]/, "");
 
       if (!organCompatibility[donorType].includes(patientType)) {
         return false;
       }
 
-      const antigens = [
+      const directKeys = [
         "hla-a-antigen",
         "hla-b-antigen",
         "hla-dr-antigen",
         "hla-dq-antigen",
       ];
-      const antibodies = [
-        "hla-a-antibody",
-        "hla-b-antibody",
-        "hla-dr-antibody",
-        "hla-dq-antibody",
-      ];
-
-      for (let i = 0; i < antigens.length; i++) {
-        const antigen = donor[antigens[i]];
-        const antibody = patient[antibodies[i]];
-
-        if (Array.isArray(antigen)) {
-          for (const a of antigen) {
-            if (
-              Array.isArray(antibody) ? antibody.includes(a) : antibody === a
-            ) {
-              return false;
-            }
-          }
-        } else if (antigen) {
-          if (
-            Array.isArray(antibody)
-              ? antibody.includes(antigen)
-              : antibody === antigen
-          ) {
-            return false;
-          }
+      for (const key of directKeys) {
+        if (
+          donor[key] &&
+          patient[key] &&
+          valueMatch(donor[key], patient[key])
+        ) {
+          return false;
         }
       }
+
+      if (valueMatch(donor["hla-a-antigen"], patient["lsa1-A"])) return false;
+      if (valueMatch(donor["hla-b-antigen"], patient["lsa1-B"])) return false;
+      if (valueMatch(donor["hla-dr-antigen"], patient["lsa2-DRB1"]))
+        return false;
+      if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQB1"]))
+        return false;
+      if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQB2"]))
+        return false;
+
       return true;
     }
-
     function displayCards(data, containerId, createCardFunction) {
       const container = document.getElementById(containerId);
       data.forEach((item) => {
@@ -182,11 +235,12 @@
         return possiblePatients;
       });
 
-      // Log all possible matches
       console.log("All possible matches:");
       graph.forEach((possiblePatients, donorIndex) => {
-        possiblePatients.forEach(patientIndex => {
-          console.log(`Donor ${donorIndex} can donate to Patient ${patientIndex}`);
+        possiblePatients.forEach((patientIndex) => {
+          console.log(
+            `Donor ${donorIndex} can donate to Patient ${patientIndex}`
+          );
         });
       });
 
@@ -205,13 +259,11 @@
         return false;
       }
 
-      // For each donor, try to find a matching patient.
       for (let u = 0; u < donors.length; u++) {
         const seen = Array(patients.length).fill(false);
         bpm(u, seen);
       }
 
-      // Build an array of matching pairs.
       const matches = [];
       for (let v = 0; v < patients.length; v++) {
         if (matchR[v] !== -1) {
@@ -223,7 +275,9 @@
 
     function createSVGOverlay() {
       const arrowsContainer = document.getElementById("arrows-container");
-      const arrowColor = getComputedStyle(document.documentElement).getPropertyValue('--arrow-color').trim();
+      const arrowColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--arrow-color")
+        .trim();
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS, "svg");
       svg.classList.add("arrows-overlay");
@@ -260,7 +314,9 @@
       );
 
       const matches = computeOptimalMatches(donorsData, patientsData);
-      const arrowColor = getComputedStyle(document.documentElement).getPropertyValue('--arrow-color').trim();
+      const arrowColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--arrow-color")
+        .trim();
 
       matches.forEach((match) => {
         const donorCard = donorCards[match.donorIndex];
@@ -305,7 +361,7 @@
 
     setTimeout(updateArrows, 100);
 
-    window.addEventListener('resize', updateArrows);
+    window.addEventListener("resize", updateArrows);
   });
 </script>
 {% endblock %}
