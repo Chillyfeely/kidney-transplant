@@ -2,6 +2,9 @@
 page_content %}
 <div class="container">
   <div class="row mb-3">
+    <div id="alertPlaceholder"></div>
+  </div>
+  <div class="row mb-3">
     <!-- DONOR PARTITION -->
     <div class="col-md-12 col-xl-6">
       <div class="card mb-3">
@@ -89,7 +92,6 @@ page_content %}
                     type="number"
                     name="weight"
                     placeholder="Kilo"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen donörün kilosunu giriniz.
@@ -104,7 +106,6 @@ page_content %}
                     type="number"
                     name="height"
                     placeholder="Boy (cm)"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen donörün boyunu giriniz.
@@ -119,7 +120,6 @@ page_content %}
                     type="text"
                     name="occupation"
                     placeholder="Meslek"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen donörün mesleğini giriniz.
@@ -328,7 +328,6 @@ page_content %}
                     type="number"
                     name="weight"
                     placeholder="Kilo"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen hastanın kilosunu giriniz.
@@ -343,7 +342,6 @@ page_content %}
                     type="number"
                     name="height"
                     placeholder="Boy (cm)"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen hastanın boyunu giriniz.
@@ -360,7 +358,6 @@ page_content %}
                     type="text"
                     name="occupation"
                     placeholder="Meslek"
-                    required
                   />
                   <div class="invalid-feedback">
                     Lütfen hastanın mesleğini giriniz.
@@ -475,7 +472,7 @@ page_content %}
                     multiple="multiple"
                     data-options='{"removeItemButton":true,"placeholder":true}'
                   >
-                    <option value="" >Seçiniz...</option>
+                    <option value="">Seçiniz...</option>
                   </select>
                 </div>
                 <div class="col-sm-12 mb-3">
@@ -487,7 +484,7 @@ page_content %}
                     multiple="multiple"
                     data-options='{"removeItemButton":true,"placeholder":true}'
                   >
-                    <option value="" >Seçiniz...</option>
+                    <option value="">Seçiniz...</option>
                   </select>
                 </div>
                 <div class="col-12">
@@ -501,9 +498,7 @@ page_content %}
               <h5 class="text-center">LSA Sınıf 2</h5>
               <div class="row gx-2">
                 <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DRB1"
-                    >DRB1</label
-                  >
+                  <label class="form-label" for="lsa2-DRB1">DRB1</label>
                   <select
                     class="form-select js-choice"
                     id="lsa2-DRB1"
@@ -511,13 +506,11 @@ page_content %}
                     multiple="multiple"
                     data-options='{"removeItemButton":true,"placeholder":true}'
                   >
-                    <option value="" >Seçiniz...</option>
+                    <option value="">Seçiniz...</option>
                   </select>
                 </div>
                 <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DQB1"
-                    >DQB1</label
-                  >
+                  <label class="form-label" for="lsa2-DQB1">DQB1</label>
                   <select
                     class="form-select js-choice"
                     id="lsa2-DQB1"
@@ -525,13 +518,11 @@ page_content %}
                     multiple="multiple"
                     data-options='{"removeItemButton":true,"placeholder":true}'
                   >
-                    <option value="" >Seçiniz...</option>
+                    <option value="">Seçiniz...</option>
                   </select>
                 </div>
                 <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DQB2"
-                    >DQB2</label
-                  >
+                  <label class="form-label" for="lsa2-DQB2">DQB2</label>
                   <select
                     class="form-select js-choice"
                     id="lsa2-DQB2"
@@ -539,7 +530,7 @@ page_content %}
                     multiple="multiple"
                     data-options='{"removeItemButton":true,"placeholder":true}'
                   >
-                    <option value="" >Seçiniz...</option>
+                    <option value="">Seçiniz...</option>
                   </select>
                 </div>
               </div>
@@ -552,9 +543,6 @@ page_content %}
     <!-- Combined Submit Button -->
     <div class="text-center my-4">
       <button id="submitAll" class="btn btn-primary">Kaydet</button>
-    </div>
-    <div class="row mb-3">
-      <div id="alertPlaceholder"></div>
     </div>
   </div>
 </div>
