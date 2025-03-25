@@ -43,18 +43,111 @@
   .tooltip-content p {
     margin-bottom: 5px;
   }
+  .form-check {
+    position: relative;
+    z-index: 10; /* Ensure checkboxes are above other elements */
+  }
+
+  .card-info {
+    cursor: pointer;
+  }
+
+  /* Make sure the tooltip doesn't interfere with checkbox */
+  .form-check-input,
+  .form-check-label {
+    position: relative;
+    z-index: 11;
+  }
+  /* Add to existing styles */
+  .donor-card .form-check-input,
+  .patient-card .form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    border-width: 2px;
+  }
+
+  .donor-card .form-check-input:checked,
+  .patient-card .form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+  }
+
+  /* Add a slight rotation to checkboxes for visual interest */
+  .donor-card .form-check {
+    transform: rotate(5deg);
+  }
+
+  .patient-card .form-check {
+    transform: rotate(-5deg);
+  }
+
+  /* Highlight cards with checked checkboxes */
+  .donor-card:has(.form-check-input:checked),
+  .patient-card:has(.form-check-input:checked) {
+    border-width: 2px !important;
+    box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5);
+  }
+
+  /* Improve the arrow display */
+  .arrows-overlay line {
+    stroke-dasharray: 4 2;
+    animation: dash 15s linear infinite;
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
 </style>
 {% endblock %} {% block page_content %}
 <div class="container mt-4 cards-wrapper">
-  <div class="row">
-    <div class="col-md-4" id="donors-container">
-      <h3 class="mb-3">Donörler (Vericiler)</h3>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Eşleştirme Kontrolleri</h4>
+          <div class="row align-items-center">
+            <div class="col-md-3 mb-2">
+              <span id="donor-selection-count" class="badge bg-primary me-2"
+                >0</span
+              >
+              Donör seçildi
+            </div>
+            <div class="col-md-3 mb-2">
+              <span id="patient-selection-count" class="badge bg-primary me-2"
+                >0</span
+              >
+              Hasta seçildi
+            </div>
+            <div class="col-md-6 text-end">
+              <button
+                id="clear-selection-btn"
+                class="btn btn-outline-secondary me-2"
+              >
+                Seçimi Temizle
+              </button>
+              <button id="match-selected-btn" class="btn btn-primary">
+                Seçilenleri Eşleştir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4" id="patients-container">
+      <h3 class="mb-3">Hastalar (Alıcılar)</h3>
+    </div>
+
     <div class="col-md-4" id="arrows-container">
       <!-- SVG overlay for arrows will be inserted here -->
     </div>
-    <div class="col-md-4" id="patients-container">
-      <h3 class="mb-3">Hastalar (Alıcılar)</h3>
+    <div class="col-md-4" id="donors-container">
+      <h3 class="mb-3">Donörler (Vericiler)</h3>
     </div>
   </div>
 </div>
@@ -100,111 +193,175 @@
     }
 
     function createDonorCard(data) {
-  // Create main card with basic information
-  const card = document.createElement("div");
-  card.className = "card donor-card mb-4 border border-primary";
-  
-  // Create card content with only required fields
-  card.innerHTML = `
-    <div class="card-body">
-      <h5 class="card-title">${data.name} ${data.surname}</h5>
-      <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
-      <p class="card-text"><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p class="card-text"><strong>TC:</strong> ${data.tc || '-'}</p>
-      <p class="card-text"><strong>Telefon:</strong> ${data.tel || '-'}</p>
-      <p class="card-text"><strong>Boy:</strong> ${data.height || '-'}</p>
-      <p class="card-text"><strong>Kilo:</strong> ${data.weight || '-'}</p>
+      // Create main card with basic information
+      const card = document.createElement("div");
+      card.className =
+        "card donor-card mb-4 border border-primary position-relative";
+      card.dataset.id = data.id || data._id || data.pair_id;
+
+      // Create card content with right-aligned checkbox and separate tooltip target
+      card.innerHTML = `
+    <div class="card-body pe-5"> <!-- Add padding to right side for checkbox -->
+      <div class="form-check position-absolute top-0 end-0 mt-2 me-2">
+        <input class="form-check-input donor-checkbox" type="checkbox" id="donor-${
+          card.dataset.id
+        }">
+        <label class="form-check-label" for="donor-${card.dataset.id}"></label>
+      </div>
+      <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
+        <h5 class="card-title">${data.name} ${data.surname}</h5>
+        <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
+          data.birthdate
+        )}</p>
+        <p class="card-text"><strong>Kan Grubu:</strong> ${
+          data["blood-type"]
+        }</p>
+        <p class="card-text"><strong>TC:</strong> ${data.tc || "-"}</p>
+        <p class="card-text"><strong>Telefon:</strong> ${data.tel || "-"}</p>
+        <p class="card-text"><strong>Boy:</strong> ${data.height || "-"}</p>
+        <p class="card-text"><strong>Kilo:</strong> ${data.weight || "-"}</p>
+      </div>
     </div>`;
-  
-  // Create tooltip content with all the details
-  const tooltipContent = `
+
+      // Create tooltip content with all the details (unchanged)
+      const tooltipContent = `
     <div class="tooltip-content">
       <h6>Kişisel Bilgiler</h6>
       <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
       <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
       <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p><strong>TC:</strong> ${data.tc || '-'}</p>
-      <p><strong>Telefon:</strong> ${data.tel || '-'}</p>
-      <p><strong>Boy:</strong> ${data.height || '-'}</p>
-      <p><strong>Kilo:</strong> ${data.weight || '-'}</p>
-      <p><strong>Meslek:</strong> ${data.occupation || '-'}</p>
-      <p><strong>Adres:</strong> ${data.address || '-'}</p>
-      <p><strong>Hastalık Geçmişi:</strong> ${data.history || '-'}</p>
+      <p><strong>TC:</strong> ${data.tc || "-"}</p>
+      <p><strong>Telefon:</strong> ${data.tel || "-"}</p>
+      <p><strong>Boy:</strong> ${data.height || "-"}</p>
+      <p><strong>Kilo:</strong> ${data.weight || "-"}</p>
+      <p><strong>Meslek:</strong> ${data.occupation || "-"}</p>
+      <p><strong>Adres:</strong> ${data.address || "-"}</p>
+      <p><strong>Hastalık Geçmişi:</strong> ${data.history || "-"}</p>
       
       <h6>HLA Bilgileri</h6>
-      <p><strong>HLA-A Antijen:</strong> ${Array.isArray(data["hla-a-antigen"]) ? data["hla-a-antigen"].join(', ') : (data["hla-a-antigen"] || '-')}</p>
-      <p><strong>HLA-B Antijen:</strong> ${Array.isArray(data["hla-b-antigen"]) ? data["hla-b-antigen"].join(', ') : (data["hla-b-antigen"] || '-')}</p>
-      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || '-'}</p>
-      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || '-'}</p>
+      <p><strong>HLA-A Antijen:</strong> ${
+        Array.isArray(data["hla-a-antigen"])
+          ? data["hla-a-antigen"].join(", ")
+          : data["hla-a-antigen"] || "-"
+      }</p>
+      <p><strong>HLA-B Antijen:</strong> ${
+        Array.isArray(data["hla-b-antigen"])
+          ? data["hla-b-antigen"].join(", ")
+          : data["hla-b-antigen"] || "-"
+      }</p>
+      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || "-"}</p>
+      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || "-"}</p>
     </div>
   `;
-  
-  // Enable tooltip on the card
-  card.setAttribute("data-bs-toggle", "tooltip");
-  card.setAttribute("data-bs-html", "true");
-  card.setAttribute("title", tooltipContent);
-  card.setAttribute("data-bs-custom-class", "custom-tooltip-large");
-  
-  return card;
-}
 
-function createPatientCard(data) {
-  // Create main card with basic information
-  const card = document.createElement("div");
-  card.className = "card patient-card mb-4 border border-primary";
-  
-  // Create card content with only required fields
-  card.innerHTML = `
-    <div class="card-body">
-      <h5 class="card-title">${data.name} ${data.surname}</h5>
-      <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
-      <p class="card-text"><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p class="card-text"><strong>TC:</strong> ${data.tc || '-'}</p>
-      <p class="card-text"><strong>Telefon:</strong> ${data.tel || '-'}</p>
-      <p class="card-text"><strong>Boy:</strong> ${data.height || '-'}</p>
-      <p class="card-text"><strong>Kilo:</strong> ${data.weight || '-'}</p>
+      // Set the tooltip content to the card-info div
+      card.querySelector(".card-info").setAttribute("title", tooltipContent);
+
+      return card;
+    }
+
+    // Modified createPatientCard function with left-aligned checkbox
+    function createPatientCard(data) {
+      // Create main card with basic information
+      const card = document.createElement("div");
+      card.className =
+        "card patient-card mb-4 border border-primary position-relative";
+      card.dataset.id = data.id || data._id || data.pair_id;
+
+      // Create card content with left-aligned checkbox and separate tooltip target
+      card.innerHTML = `
+    <div class="card-body ps-5"> <!-- Add padding to left side for checkbox -->
+      <div class="form-check position-absolute top-0 start-0 mt-2 ms-2">
+        <input class="form-check-input patient-checkbox" type="checkbox" id="patient-${
+          card.dataset.id
+        }">
+        <label class="form-check-label" for="patient-${
+          card.dataset.id
+        }"></label>
+      </div>
+      <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
+        <h5 class="card-title">${data.name} ${data.surname}</h5>
+        <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
+          data.birthdate
+        )}</p>
+        <p class="card-text"><strong>Kan Grubu:</strong> ${
+          data["blood-type"]
+        }</p>
+        <p class="card-text"><strong>TC:</strong> ${data.tc || "-"}</p>
+        <p class="card-text"><strong>Telefon:</strong> ${data.tel || "-"}</p>
+        <p class="card-text"><strong>Boy:</strong> ${data.height || "-"}</p>
+        <p class="card-text"><strong>Kilo:</strong> ${data.weight || "-"}</p>
+      </div>
     </div>`;
-  
-  // Create tooltip content for all patient details
-  const tooltipContent = `
+
+      // Create tooltip content for all patient details (unchanged)
+      const tooltipContent = `
     <div class="tooltip-content">
       <h6>Kişisel Bilgiler</h6>
       <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
       <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
       <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p><strong>TC:</strong> ${data.tc || '-'}</p>
-      <p><strong>Telefon:</strong> ${data.tel || '-'}</p>
-      <p><strong>Boy:</strong> ${data.height || '-'}</p>
-      <p><strong>Kilo:</strong> ${data.weight || '-'}</p>
-      <p><strong>Meslek:</strong> ${data.occupation || '-'}</p>
-      <p><strong>Adres:</strong> ${data.address || '-'}</p>
-      <p><strong>Hastalık Geçmişi:</strong> ${data.history || '-'}</p>
+      <p><strong>TC:</strong> ${data.tc || "-"}</p>
+      <p><strong>Telefon:</strong> ${data.tel || "-"}</p>
+      <p><strong>Boy:</strong> ${data.height || "-"}</p>
+      <p><strong>Kilo:</strong> ${data.weight || "-"}</p>
+      <p><strong>Meslek:</strong> ${data.occupation || "-"}</p>
+      <p><strong>Adres:</strong> ${data.address || "-"}</p>
+      <p><strong>Hastalık Geçmişi:</strong> ${data.history || "-"}</p>
       
       <h6>Antijen Bilgileri</h6>
-      <p><strong>HLA-A Antijen:</strong> ${Array.isArray(data["hla-a-antigen"]) ? data["hla-a-antigen"].join(', ') : (data["hla-a-antigen"] || '-')}</p>
-      <p><strong>HLA-B Antijen:</strong> ${Array.isArray(data["hla-b-antigen"]) ? data["hla-b-antigen"].join(', ') : (data["hla-b-antigen"] || '-')}</p>
-      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || '-'}</p>
-      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || '-'}</p>
+      <p><strong>HLA-A Antijen:</strong> ${
+        Array.isArray(data["hla-a-antigen"])
+          ? data["hla-a-antigen"].join(", ")
+          : data["hla-a-antigen"] || "-"
+      }</p>
+      <p><strong>HLA-B Antijen:</strong> ${
+        Array.isArray(data["hla-b-antigen"])
+          ? data["hla-b-antigen"].join(", ")
+          : data["hla-b-antigen"] || "-"
+      }</p>
+      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || "-"}</p>
+      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || "-"}</p>
       
       <h6>LSA Antijen Bilgileri</h6>
-      <p><strong>LSA-A Antijen:</strong> ${Array.isArray(data["lsa1-A"]) ? data["lsa1-A"].join(', ') : (data["lsa1-A"] || '-')}</p>
-      <p><strong>LSA-B Antijen:</strong> ${Array.isArray(data["lsa1-B"]) ? data["lsa1-B"].join(', ') : (data["lsa1-B"] || '-')}</p>
-      <p><strong>LSA-C Antijen:</strong> ${Array.isArray(data["lsa1-C"]) ? data["lsa1-C"].join(', ') : (data["lsa1-C"] || '-')}</p>
-      <p><strong>LSA-DRB1 Antijen:</strong> ${Array.isArray(data["lsa2-DRB1"]) ? data["lsa2-DRB1"].join(', ') : (data["lsa2-DRB1"] || '-')}</p>
-      <p><strong>LSA-DQB1 Antijen:</strong> ${Array.isArray(data["lsa2-DQB1"]) ? data["lsa2-DQB1"].join(', ') : (data["lsa2-DQB1"] || '-')}</p>
-      <p><strong>LSA-DRB2 Antijen:</strong> ${Array.isArray(data["lsa2-DQB2"]) ? data["lsa2-DQB2"].join(', ') : (data["lsa2-DQB2"] || '-')}</p>
+      <p><strong>LSA-A Antijen:</strong> ${
+        Array.isArray(data["lsa1-A"])
+          ? data["lsa1-A"].join(", ")
+          : data["lsa1-A"] || "-"
+      }</p>
+      <p><strong>LSA-B Antijen:</strong> ${
+        Array.isArray(data["lsa1-B"])
+          ? data["lsa1-B"].join(", ")
+          : data["lsa1-B"] || "-"
+      }</p>
+      <p><strong>LSA-C Antijen:</strong> ${
+        Array.isArray(data["lsa1-C"])
+          ? data["lsa1-C"].join(", ")
+          : data["lsa1-C"] || "-"
+      }</p>
+      <p><strong>LSA-DRB1 Antijen:</strong> ${
+        Array.isArray(data["lsa2-DRB1"])
+          ? data["lsa2-DRB1"].join(", ")
+          : data["lsa2-DRB1"] || "-"
+      }</p>
+      <p><strong>LSA-DQB1 Antijen:</strong> ${
+        Array.isArray(data["lsa2-DQB1"])
+          ? data["lsa2-DQB1"].join(", ")
+          : data["lsa2-DQB1"] || "-"
+      }</p>
+      <p><strong>LSA-DRB2 Antijen:</strong> ${
+        Array.isArray(data["lsa2-DQB2"])
+          ? data["lsa2-DQB2"].join(", ")
+          : data["lsa2-DQB2"] || "-"
+      }</p>
     </div>
   `;
-  
-  // Enable tooltip on the card
-  card.setAttribute("data-bs-toggle", "tooltip");
-  card.setAttribute("data-bs-html", "true");
-  card.setAttribute("title", tooltipContent);
-  card.setAttribute("data-bs-custom-class", "custom-tooltip-large");
-  
-  return card;
-}
 
+      // Set the tooltip content to the card-info div
+      card.querySelector(".card-info").setAttribute("title", tooltipContent);
+
+      return card;
+    }
     function valueMatch(a, b) {
       if (!a || !b) return false;
       if (Array.isArray(a)) {
@@ -224,16 +381,111 @@ function createPatientCard(data) {
       });
     }
 
+    function setupSelectionHandlers() {
+      const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
+      const patientCheckboxes = document.querySelectorAll(".patient-checkbox");
+      const donorSelectionCount = document.getElementById(
+        "donor-selection-count"
+      );
+      const patientSelectionCount = document.getElementById(
+        "patient-selection-count"
+      );
+      const clearSelectionBtn = document.getElementById("clear-selection-btn");
+      const matchSelectedBtn = document.getElementById("match-selected-btn");
+
+      function updateSelectionCounts() {
+        const selectedDonors = document.querySelectorAll(
+          ".donor-checkbox:checked"
+        ).length;
+        const selectedPatients = document.querySelectorAll(
+          ".patient-checkbox:checked"
+        ).length;
+
+        donorSelectionCount.textContent = selectedDonors;
+        patientSelectionCount.textContent = selectedPatients;
+
+        matchSelectedBtn.disabled =
+          selectedDonors === 0 || selectedPatients === 0;
+      }
+
+      donorCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateSelectionCounts);
+      });
+
+      patientCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateSelectionCounts);
+      });
+
+      clearSelectionBtn.addEventListener("click", () => {
+        donorCheckboxes.forEach((checkbox) => (checkbox.checked = false));
+        patientCheckboxes.forEach((checkbox) => (checkbox.checked = false));
+        updateSelectionCounts();
+        clearArrows();
+      });
+
+      matchSelectedBtn.addEventListener("click", () => {
+        const selectedDonorIndices = Array.from(donorCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        const selectedPatientIndices = Array.from(patientCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        const selectedDonors = selectedDonorIndices.map(
+          (index) => donors[index]
+        );
+        const selectedPatients = selectedPatientIndices.map(
+          (index) => patients[index]
+        );
+
+        const donorIndexMap = selectedDonorIndices.reduce(
+          (map, selIndex, i) => {
+            map[i] = selIndex;
+            return map;
+          },
+          {}
+        );
+
+        const patientIndexMap = selectedPatientIndices.reduce(
+          (map, selIndex, i) => {
+            map[i] = selIndex;
+            return map;
+          },
+          {}
+        );
+
+        const matches = computeOptimalMatches(selectedDonors, selectedPatients);
+
+        const mappedMatches = matches.map((match) => ({
+          donorIndex: donorIndexMap[match.donorIndex],
+          patientIndex: patientIndexMap[match.patientIndex],
+        }));
+
+        const svg = createSVGOverlay();
+        drawMatchArrows(mappedMatches, svg);
+      });
+
+      updateSelectionCounts();
+    }
+
+    function clearArrows() {
+      const arrowsContainer = document.getElementById("arrows-container");
+      arrowsContainer.innerHTML = "";
+    }
+
     function initTooltips() {
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl, {
-      container: 'body',
-      boundary: 'window',
-      html: true
-    });
-  });
-}
+      const tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+          container: "body",
+          boundary: "window",
+          html: true,
+        });
+      });
+    }
 
     function canDonate(donor, patient) {
       const organCompatibility = {
@@ -450,7 +702,7 @@ function createPatientCard(data) {
       return svg;
     }
 
-    function drawOptimalArrows(donorsData, patientsData, svg) {
+    function drawMatchArrows(matches, svg) {
       const svgNS = "http://www.w3.org/2000/svg";
       const donorCards = document.querySelectorAll(
         "#donors-container .donor-card"
@@ -458,8 +710,6 @@ function createPatientCard(data) {
       const patientCards = document.querySelectorAll(
         "#patients-container .patient-card"
       );
-
-      const matches = computeOptimalMatches(donorsData, patientsData);
       const arrowColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--arrow-color")
         .trim();
@@ -474,9 +724,9 @@ function createPatientCard(data) {
           .querySelector(".cards-wrapper")
           .getBoundingClientRect();
 
-        const startX = donorRect.right - wrapperRect.left;
+        const startX = donorRect.left - wrapperRect.left;
         const startY = donorRect.top + donorRect.height / 2 - wrapperRect.top;
-        const endX = patientRect.left - wrapperRect.left;
+        const endX = patientRect.right - wrapperRect.left;
         const endY = patientRect.top + patientRect.height / 2 - wrapperRect.top;
 
         const line = document.createElementNS(svgNS, "line");
@@ -491,6 +741,103 @@ function createPatientCard(data) {
       });
     }
 
+    function setupSelectionHandlers() {
+      const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
+      const patientCheckboxes = document.querySelectorAll(".patient-checkbox");
+      const donorSelectionCount = document.getElementById(
+        "donor-selection-count"
+      );
+      const patientSelectionCount = document.getElementById(
+        "patient-selection-count"
+      );
+      const clearSelectionBtn = document.getElementById("clear-selection-btn");
+      const matchSelectedBtn = document.getElementById("match-selected-btn");
+
+      function updateSelectionCounts() {
+        const selectedDonors = document.querySelectorAll(
+          ".donor-checkbox:checked"
+        ).length;
+        const selectedPatients = document.querySelectorAll(
+          ".patient-checkbox:checked"
+        ).length;
+
+        donorSelectionCount.textContent = selectedDonors;
+        patientSelectionCount.textContent = selectedPatients;
+
+        // Enable match button only if at least one donor and one patient are selected
+        matchSelectedBtn.disabled =
+          selectedDonors === 0 || selectedPatients === 0;
+      }
+
+      // Add event listeners to checkboxes
+      donorCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateSelectionCounts);
+      });
+
+      patientCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updateSelectionCounts);
+      });
+
+      // Clear selection button
+      clearSelectionBtn.addEventListener("click", () => {
+        donorCheckboxes.forEach((checkbox) => (checkbox.checked = false));
+        patientCheckboxes.forEach((checkbox) => (checkbox.checked = false));
+        updateSelectionCounts();
+        clearArrows();
+      });
+
+      // Match selected button
+      matchSelectedBtn.addEventListener("click", () => {
+        const selectedDonorIndices = Array.from(donorCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        const selectedPatientIndices = Array.from(patientCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        const selectedDonors = selectedDonorIndices.map(
+          (index) => donors[index]
+        );
+        const selectedPatients = selectedPatientIndices.map(
+          (index) => patients[index]
+        );
+
+        // Create the mapping from selected indices to original indices
+        const donorIndexMap = selectedDonorIndices.reduce(
+          (map, selIndex, i) => {
+            map[i] = selIndex;
+            return map;
+          },
+          {}
+        );
+
+        const patientIndexMap = selectedPatientIndices.reduce(
+          (map, selIndex, i) => {
+            map[i] = selIndex;
+            return map;
+          },
+          {}
+        );
+
+        // Match only selected donors and patients
+        const matches = computeOptimalMatches(selectedDonors, selectedPatients);
+
+        // Map the selected indices back to the original indices
+        const mappedMatches = matches.map((match) => ({
+          donorIndex: donorIndexMap[match.donorIndex],
+          patientIndex: patientIndexMap[match.patientIndex],
+        }));
+
+        // Draw arrows for the matches
+        const svg = createSVGOverlay();
+        drawMatchArrows(mappedMatches, svg);
+      });
+
+      // Initialize button state
+      updateSelectionCounts();
+    }
+
     const donors = await fetchData("/db/get-donors", "donors");
     const patients = await fetchData("/db/get-patients", "patients");
 
@@ -498,17 +845,32 @@ function createPatientCard(data) {
     if (patients)
       displayCards(patients, "patients-container", createPatientCard);
 
-    function updateArrows() {
-      if (donors && patients) {
-        const svg = createSVGOverlay();
-        drawOptimalArrows(donors, patients, svg);
-      }
-    }
-
-    setTimeout(updateArrows, 100);
-
-    window.addEventListener("resize", updateArrows);
     initTooltips();
+    setupSelectionHandlers();
+
+    window.addEventListener("resize", () => {
+      if (document.querySelector("#arrows-container svg")) {
+        const svg = createSVGOverlay();
+        const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
+        const patientCheckboxes =
+          document.querySelectorAll(".patient-checkbox");
+
+        const selectedDonorIndices = Array.from(donorCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        const selectedPatientIndices = Array.from(patientCheckboxes)
+          .map((checkbox, index) => (checkbox.checked ? index : -1))
+          .filter((index) => index !== -1);
+
+        if (
+          selectedDonorIndices.length > 0 &&
+          selectedPatientIndices.length > 0
+        ) {
+          document.getElementById("match-selected-btn").click();
+        }
+      }
+    });
   });
 </script>
 {% endblock %}

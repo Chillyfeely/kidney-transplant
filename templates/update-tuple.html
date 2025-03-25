@@ -782,7 +782,7 @@ page_content %}
 <script src="{{ url_for('static', filename='vendors/choices/choices.min.js') }}"></script>
 <script src="{{ url_for('static', filename='vendors/prism/prism.js') }}"></script>
 <script>
-  // Standard antigen population for donor & patient HLA fields
+  const pair_id = "{{ pair_id }}";
   function populateOptions(selectId, prefix, count) {
     const select = document.getElementById(selectId);
     for (let i = 1; i <= count; i++) {
@@ -792,7 +792,7 @@ page_content %}
       select.appendChild(option);
     }
   }
-  // Populate LSA Sınıf selections via a dedicated function
+
   function populateLSAOptions(selectId, prefix, start, end) {
     const select = document.getElementById(selectId);
     for (let i = start; i <= end; i++) {
@@ -805,29 +805,90 @@ page_content %}
     }
   }
 
-  populateOptions("antigenChoserA", "A*", 99);
-  populateOptions("antigenChoserB", "B*", 99);
-  populateOptions("antigenChoserDR", "DRB1*", 99);
-  populateOptions("antigenChoserDQ", "DQB1*", 99);
-  populateOptions("antigenChoserDQ", "DQA1*", 99);
+  function populateWrapper() {
+    populateOptions("antigenChoserA", "A*", 99);
+    populateOptions("antigenChoserB", "B*", 99);
+    populateOptions("antigenChoserDR", "DRB1*", 99);
+    populateOptions("antigenChoserDQ", "DQB1*", 99);
+    populateOptions("antigenChoserDQ", "DQA1*", 99);
 
-  populateOptions("patient-antigenChoserA", "A*", 99);
-  populateOptions("patient-antigenChoserB", "B*", 99);
-  populateOptions("patient-antigenChoserDR", "DRB1*", 99);
+    populateOptions("patient-antigenChoserA", "A*", 99);
+    populateOptions("patient-antigenChoserB", "B*", 99);
+    populateOptions("patient-antigenChoserDR", "DRB1*", 99);
 
-  // LSA Sınıf 1 fields
-  populateLSAOptions("lsa1-A", "A", 1, 99);
-  populateLSAOptions("lsa1-B", "B", 1, 160);
-  populateLSAOptions("lsa1-C", "C", 1, 20);
-  // LSA Sınıf 2 fields
-  populateLSAOptions("lsa2-DRB1", "DRB1", 1, 40);
-  populateLSAOptions("lsa2-DQB1", "DQB1", 1, 20);
-  populateLSAOptions("lsa2-DQA1", "DQA1", 1, 20);
+    populateLSAOptions("lsa1-A", "A", 1, 99);
+    populateLSAOptions("lsa1-B", "B", 1, 160);
+    populateLSAOptions("lsa1-C", "C", 1, 20);
 
-  // Single combined submit event
-  document
-    .getElementById("submitAll")
-    .addEventListener("click", async function (event) {
+    populateLSAOptions("lsa2-DRB1", "DRB1", 1, 40);
+    populateLSAOptions("lsa2-DQB1", "DQB1", 1, 20);
+    populateLSAOptions("lsa2-DQA1", "DQA1", 1, 20);
+  }
+
+  function showAlert(message, type) {
+    const alertPlaceholder = document.getElementById("alertPlaceholder");
+    alertPlaceholder.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show text-center" role="alert">
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+  }
+
+  function fillPatientForm(patientData) {
+    document.getElementById("patient-name").value = patientData.name || "";
+    document.getElementById("patient-surname").value =
+      patientData.surname || "";
+    document.getElementById("patient-birthdate").value =
+      patientData.birthdate || "";
+    document.getElementById("patient-blood-type").value =
+      patientData["blood-type"] || "";
+    document.getElementById("patient-tc").value = patientData.tc || "";
+    document.getElementById("patient-tel").value = patientData.tel || "";
+    document.getElementById("patient-height").value = patientData.height || "";
+    document.getElementById("patient-weight").value = patientData.weight || "";
+    document.getElementById("patient-occupation").value =
+      patientData.occupation || "";
+    document.getElementById("patient-address").value =
+      patientData.address || "";
+    document.getElementById("patient-history").value =
+      patientData.history || "";
+
+    if (patientData["pra-class1-status"] === "positive") {
+      document.getElementById("pra-class1-positive").checked = true;
+      document.getElementById("pra-class1-percentage-container").style.display =
+        "block";
+      document.getElementById("pra-class1-percentage").value =
+        patientData["pra-class1-percentage"] || "";
+    }
+
+    if (patientData["pra-class2-status"] === "positive") {
+      document.getElementById("pra-class2-positive").checked = true;
+      document.getElementById("pra-class2-percentage-container").style.display =
+        "block";
+      document.getElementById("pra-class2-percentage").value =
+        patientData["pra-class2-percentage"] || "";
+    }
+  }
+
+  function fillDonorForm(donorData) {
+    document.getElementById("name").value = donorData.name || "";
+    document.getElementById("surname").value = donorData.surname || "";
+    document.getElementById("birthdate").value = donorData.birthdate || "";
+    document.getElementById("blood-type").value = donorData["blood-type"] || "";
+    document.getElementById("tc").value = donorData.tc || "";
+    document.getElementById("tel").value = donorData.tel || "";
+    document.getElementById("height").value = donorData.height || "";
+    document.getElementById("weight").value = donorData.weight || "";
+    document.getElementById("occupation").value = donorData.occupation || "";
+    document.getElementById("address").value = donorData.address || "";
+    document.getElementById("history").value = donorData.history || "";
+    document.getElementById("relationship-status").value =
+      donorData.bond || "0";
+  }
+
+  populateWrapper();
+  
+  document.getElementById("submitAll").addEventListener("click", async function (event) {
       event.preventDefault();
 
       let donorForm = document.getElementById("donorForm");
@@ -839,7 +900,6 @@ page_content %}
       patientForm.classList.add("was-validated");
       if (!donorValid || !patientValid) return;
 
-      // Gather donor data
       let donorData = {};
       new FormData(donorForm).forEach((value, key) => {
         if (donorData[key]) {
@@ -853,7 +913,6 @@ page_content %}
         }
       });
 
-      // Gather patient data
       let patientData = {};
       new FormData(patientForm).forEach((value, key) => {
         if (patientData[key]) {
@@ -867,58 +926,66 @@ page_content %}
         }
       });
 
-      // Use donor's relationship-status as bond and create a unique pair_id.
       let bond = donorData["relationship-status"];
       donorData["bond"] = bond;
       patientData["bond"] = bond;
-      let pairId = crypto.randomUUID
-        ? crypto.randomUUID()
-        : Date.now().toString();
-      donorData["pair_id"] = pairId;
-      patientData["pair_id"] = pairId;
+
+      donorData["pair_id"] = pair_id;
+      patientData["pair_id"] = pair_id;
 
       try {
-        // Use the enhanced fetch for both requests
-        const [donorResponse, patientResponse] = await Promise.all([
-          enhancedFetch("/db/register-donor", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(donorData),
+        const updateResponse = await enhancedFetch("/db/update-tuple", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pair_id: pair_id,
+            donor: donorData,
+            patient: patientData,
           }),
-          enhancedFetch("/db/register-patient", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(patientData),
-          }),
-        ]);
+        });
 
-        showAlert("Donör ve Hasta bilgileri başarıyla kaydedildi.", "success");
+        showAlert("Donör ve Hasta bilgileri başarıyla güncellendi.", "success");
         donorForm.reset();
         patientForm.reset();
         donorForm.classList.remove("was-validated");
         patientForm.classList.remove("was-validated");
+        window.scrollTo(0, 0);
       } catch (error) {
         console.error("Error:", error);
         showAlert(
-          "Bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyiniz.",
+          "Güncelleme sırasında bir hata oluştu. Lütfen tekrar deneyiniz.",
           "danger"
         );
       }
       window.scrollTo(0, 0);
     });
 
-  function showAlert(message, type) {
-    const alertPlaceholder = document.getElementById("alertPlaceholder");
-    alertPlaceholder.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show text-center" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>`;
-  }
+  document.addEventListener("DOMContentLoaded", async function () {
+    try {
+      const data = await enhancedFetch("/db/get-tuple", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pair_id: pair_id }),
+      });
 
-  // Add to the script section at the bottom
-  document.addEventListener("DOMContentLoaded", function () {
-    // PRA Class 1 radio button handling
+      console.log("Fetched tuple data:", data);
+
+      if (data && data.patient && data.donor) {
+        fillPatientForm(data.patient);
+        fillDonorForm(data.donor);
+        showAlert("Form verisi başarıyla yüklendi.", "success");
+      } else {
+        console.error("Invalid data format received:", data);
+        showAlert("Veri formatı geçersiz.", "warning");
+      }
+    } catch (error) {
+      console.error("Error fetching tuple data:", error);
+      showAlert(
+        "Veri yüklenirken bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyiniz.",
+        "danger"
+      );
+    }
+
     const praClass1Radios = document.querySelectorAll(
       'input[name="pra-class1-status"]'
     );
@@ -936,7 +1003,6 @@ page_content %}
       });
     });
 
-    // PRA Class 2 radio button handling
     const praClass2Radios = document.querySelectorAll(
       'input[name="pra-class2-status"]'
     );

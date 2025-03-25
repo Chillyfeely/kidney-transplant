@@ -19,3 +19,7 @@ def register_tuple():
 @website_bp.route("/data-management")
 def data_management():
     return render_template("data-management.html")
+
+@website_bp.route("/update-tuple/<string:pair_id>")
+def update_tuple(pair_id):
+    return render_template("update-tuple.html", pair_id=pair_id)
