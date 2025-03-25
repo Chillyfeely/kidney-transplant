@@ -1,19 +1,38 @@
-{% extends 'rebase.html' %} 
-{% block stylesheets %}{% endblock %}
+{% extends 'rebase.html' %} {% block stylesheets %}
+<style>
+  .table-responsive-xl {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .table td, .table th {
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    max-height: 50px; /* Set a fixed height for cells */
+    vertical-align: middle;
+    cursor: default; /* Change cursor for cells with tooltips */
+  }
+  
+  .table {
+    table-layout: fixed;
+  }
+  
+</style>
+{% endblock %}
 
 <!-- ===============================================-->
 <!--    Page Content-->
 <!-- ===============================================-->
 {% block page_content %}
-<div class="container mt-4" style="width: 80%; border-radius: 20px;">
+<div class="container mt-4" style="width: 95%; border-radius: 20px">
   <div class="card border border-primary">
     <div class="card-header">
       <h3 class="mb-0 text-center"><strong>Veri Tabanı</strong></h3>
     </div>
     <div class="card-body">
-
-      <div class="table-responsive scrollbar">
-        <table class="table table-striped overflow-hidden">
+      <div class="table-responsive-xl">
+        <table class="table table-sm table-bordered">
           <thead>
             <tr class="btn-reveal-trigger">
               <th scope="col">Ad</th>
@@ -22,7 +41,10 @@
               <th scope="col">Kan Grubu</th>
               <th scope="col">Kilo</th>
               <th scope="col">Boy</th>
-              <th scope="col">Meslek</th>
+              <th scope="col">TC</th>
+              <th scope="col">Telefon</th>
+              <th scope="col">Adres</th>
+              <th scope="col">Yakını</th>
               <th scope="col">Kayıt Tipi</th>
               <th class="text-end" scope="col">Aksiyonlar</th>
             </tr>
@@ -50,18 +72,57 @@
         if (data.status) {
           const tableBody = document.getElementById("registersTableBody");
 
+          // Create maps to organize donors and patients by pair_id
+          const donorsByPairId = new Map();
+          const patientsByPairId = new Map();
+
+          // Organize data by pair_id
+          data.all_registers.donors.forEach((donor) => {
+            if (donor.pair_id) {
+              donorsByPairId.set(donor.pair_id, donor);
+            }
+          });
+
+          data.all_registers.patients.forEach((patient) => {
+            if (patient.pair_id) {
+              patientsByPairId.set(patient.pair_id, patient);
+            }
+          });
+
           // Process donors
           data.all_registers.donors.forEach((register) => {
+            // Find related patient using pair_id
+            let relatedPerson = "Yok";
+            if (register.pair_id && patientsByPairId.has(register.pair_id)) {
+              const related = patientsByPairId.get(register.pair_id);
+              relatedPerson = `${related.name || ""} ${related.surname || ""}`;
+            }
+
             const row = document.createElement("tr");
             row.classList.add("btn-reveal-trigger");
+            
+            // Create cells with tooltip functionality
+            const name = register.name || "";
+            const surname = register.surname || "";
+            const birthdate = register.birthdate || "";
+            const bloodType = register["blood-type"] || "";
+            const weight = register.weight ? `${register.weight} kg` : "";
+            const height = register.height ? `${register.height} cm` : "";
+            const tc = register.tc || "";
+            const tel = register.tel || "";
+            const address = register.address || "";
+            
             row.innerHTML = `
-              <td>${register.name}</td>
-              <td>${register.surname}</td>
-              <td>${register.birthdate}</td>
-              <td>${register["blood-type"]}</td>
-              <td>${register.weight}</td>
-              <td>${register.height}</td>
-              <td>${register.occupation}</td>
+              <td data-bs-toggle="tooltip" title="${name}">${name}</td>
+              <td data-bs-toggle="tooltip" title="${surname}">${surname}</td>
+              <td data-bs-toggle="tooltip" title="${birthdate}">${birthdate}</td>
+              <td data-bs-toggle="tooltip" title="${bloodType}">${bloodType}</td>
+              <td data-bs-toggle="tooltip" title="${weight}">${weight}</td>
+              <td data-bs-toggle="tooltip" title="${height}">${height}</td>
+              <td data-bs-toggle="tooltip" title="${tc}">${tc}</td>
+              <td data-bs-toggle="tooltip" title="${tel}">${tel}</td>
+              <td data-bs-toggle="tooltip" title="${address}">${address}</td>
+              <td data-bs-toggle="tooltip" title="${relatedPerson}">${relatedPerson}</td>
               <td>Donör</td>
               <td class="text-end">
                 <div class="dropdown font-sans-serif position-static">
@@ -70,7 +131,7 @@
                   </button>
                   <div class="dropdown-menu dropdown-menu-end border py-0">
                     <div class="py-2">
-                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Donor')">Sil</a>
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${name}', '${surname}', '${birthdate}', 'Donor')">Sil</a>
                     </div>
                   </div>
                 </div>
@@ -81,16 +142,38 @@
 
           // Process patients
           data.all_registers.patients.forEach((register) => {
+            // Find related donor using pair_id
+            let relatedPerson = "Yok";
+            if (register.pair_id && donorsByPairId.has(register.pair_id)) {
+              const related = donorsByPairId.get(register.pair_id);
+              relatedPerson = `${related.name || ""} ${related.surname || ""}`;
+            }
+
             const row = document.createElement("tr");
             row.classList.add("btn-reveal-trigger");
+            
+            // Create cells with tooltip functionality
+            const name = register.name || "";
+            const surname = register.surname || "";
+            const birthdate = register.birthdate || "";
+            const bloodType = register["blood-type"] || "";
+            const weight = register.weight ? `${register.weight} kg` : "";
+            const height = register.height ? `${register.height} cm` : "";
+            const tc = register.tc || "";
+            const tel = register.tel || "";
+            const address = register.address || "";
+            
             row.innerHTML = `
-              <td>${register.name}</td>
-              <td>${register.surname}</td>
-              <td>${register.birthdate}</td>
-              <td>${register["blood-type"]}</td>
-              <td>${register.weight} kg</td>
-              <td>${register.height} cm</td>
-              <td>${register.occupation}</td>
+              <td data-bs-toggle="tooltip" title="${name}">${name}</td>
+              <td data-bs-toggle="tooltip" title="${surname}">${surname}</td>
+              <td data-bs-toggle="tooltip" title="${birthdate}">${birthdate}</td>
+              <td data-bs-toggle="tooltip" title="${bloodType}">${bloodType}</td>
+              <td data-bs-toggle="tooltip" title="${weight}">${weight}</td>
+              <td data-bs-toggle="tooltip" title="${height}">${height}</td>
+              <td data-bs-toggle="tooltip" title="${tc}">${tc}</td>
+              <td data-bs-toggle="tooltip" title="${tel}">${tel}</td>
+              <td data-bs-toggle="tooltip" title="${address}">${address}</td>
+              <td data-bs-toggle="tooltip" title="${relatedPerson}">${relatedPerson}</td>
               <td>Hasta</td>
               <td class="text-end">
                 <div class="dropdown font-sans-serif position-static">
@@ -99,7 +182,7 @@
                   </button>
                   <div class="dropdown-menu dropdown-menu-end border py-0">
                     <div class="py-2">
-                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${register.name}', '${register.surname}', '${register.birthdate}', 'Patient')">Sil</a>
+                      <a class="dropdown-item text-danger" href="#!" onclick="deleteRegister('${name}', '${surname}', '${birthdate}', 'Patient')">Sil</a>
                     </div>
                   </div>
                 </div>
@@ -107,6 +190,15 @@
             `;
             tableBody.appendChild(row);
           });
+          
+          // Initialize all tooltips after adding rows
+          const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+          tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+              boundary: document.body
+            });
+          });
+          
         } else {
           console.error("Error fetching registers:", data.message);
         }
@@ -115,7 +207,7 @@
         console.error("Error:", error);
       });
   });
-
+  
   function deleteRegister(name, surname, birthdate, type) {
     fetch("/db/delete-register", {
       method: "POST",

@@ -5,6 +5,496 @@ page_content %}
     <div id="alertPlaceholder"></div>
   </div>
   <div class="row mb-3">
+    <!-- PATIENT PARTITION -->
+    <div class="col-md-12 col-xl-6">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3 class="mb-0 text-center"><strong>Hasta Bilgileri</strong></h3>
+        </div>
+        <div class="card-body bg-body-tertiary">
+          <form id="patientForm" class="needs-validation" novalidate>
+            <div class="container mt-3">
+              <h5 class="text-center">Kişisel Bilgiler</h5>
+              <div class="row gx-2">
+                <!-- Name Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-name">Ad</label>
+                  <input
+                    class="form-control"
+                    id="patient-name"
+                    type="text"
+                    name="name"
+                    placeholder="Ad"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın adını giriniz.
+                  </div>
+                </div>
+                <!-- Surname Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-surname">Soyad</label>
+                  <input
+                    class="form-control"
+                    id="patient-surname"
+                    type="text"
+                    name="surname"
+                    placeholder="Soyad"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın soyadını giriniz.
+                  </div>
+                </div>
+                <!-- Birthdate Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-birthdate"
+                    >Doğum Tarihi</label
+                  >
+                  <input
+                    class="form-control"
+                    id="patient-birthdate"
+                    type="date"
+                    name="birthdate"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen geçerli bir doğum tarihi giriniz.
+                  </div>
+                </div>
+                <!-- Blood Type Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-blood-type"
+                    >Kan Grubu</label
+                  >
+                  <select
+                    class="form-select"
+                    id="patient-blood-type"
+                    name="blood-type"
+                    required
+                  >
+                    <option value="" selected disabled>Seçiniz...</option>
+                    <option value="A Rh+">A Rh (pozitif)</option>
+                    <option value="A Rh-">A Rh (negatif)</option>
+                    <option value="B Rh+">B Rh (pozitif)</option>
+                    <option value="B Rh-">B Rh (negatif)</option>
+                    <option value="AB Rh+">AB Rh (pozitif)</option>
+                    <option value="AB Rh-">AB Rh (negatif)</option>
+                    <option value="O Rh+">O Rh (pozitif)</option>
+                    <option value="O Rh-">O Rh (negatif)</option>
+                  </select>
+                  <div class="invalid-feedback">
+                    Lütfen hastanın kan grubunu seçiniz.
+                  </div>
+                </div>
+
+                <!-- TC Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-tc"
+                    >TC Kimlik Numarası</label
+                  >
+                  <input
+                    class="form-control"
+                    id="patient-tc"
+                    type="number"
+                    name="tc"
+                    placeholder="TCKN"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın TC kimlik numarasını giriniz.
+                  </div>
+                </div>
+                <!-- Telephone Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-tel"
+                    >Telefon Numarası</label
+                  >
+                  <input
+                    class="form-control"
+                    id="patient-tel"
+                    type="tel"
+                    name="tel"
+                    placeholder="Telefon Numarası"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın Telefon numarasını giriniz.
+                  </div>
+                </div>
+                <!-- Height Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-height">Boy</label>
+                  <input
+                    class="form-control"
+                    id="patient-height"
+                    type="number"
+                    name="height"
+                    placeholder="Boy (cm)"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın boyunu giriniz.
+                  </div>
+                </div>
+                <!-- Weight Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="patient-weight">Kilo</label>
+                  <input
+                    class="form-control"
+                    id="patient-weight"
+                    type="number"
+                    name="weight"
+                    placeholder="Kilo"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın kilosunu giriniz.
+                  </div>
+                </div>
+
+                <!-- Occupation Field -->
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="patient-occupation"
+                    >Meslek</label
+                  >
+                  <input
+                    class="form-control"
+                    id="patient-occupation"
+                    type="text"
+                    name="occupation"
+                    placeholder="Meslek"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın mesleğini giriniz.
+                  </div>
+                </div>
+                <!-- Address Field -->
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="patient-address">Adres</label>
+                  <textarea
+                    class="form-control"
+                    id="patient-address"
+                    type="text"
+                    name="address"
+                    placeholder="Adres"
+                    rows="3"
+                  ></textarea>
+                  <div class="invalid-feedback">
+                    Lütfen hastanın adresini giriniz.
+                  </div>
+                </div>
+                <!-- History Field -->
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="patient-history"
+                    >Hastalık Geçmişi</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="patient-history"
+                    type="text"
+                    name="history"
+                    placeholder="Hastalık Geçmişi"
+                    rows="3"
+                  ></textarea>
+                  <div class="invalid-feedback">
+                    Lütfen hastanın hastalık geçmişini giriniz.
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="border-bottom border-dashed my-3"></div>
+                </div>
+              </div>
+            </div>
+            <!-- HLA-Antijen Bilgileri for Patient -->
+            <div class="container mt-3">
+              <h5 class="text-center">HLA-Antijen Bilgileri</h5>
+              <div
+                class="tab-pane preview-tab-pane active"
+                role="tabpanel"
+                aria-labelledby="patient-antigensA"
+                id="patient-antigensA"
+              >
+                <label for="patient-antigenChoserA">HLA-A Antijenleri</label>
+                <select
+                  class="form-select js-choice"
+                  id="patient-antigenChoserA"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-a-antigen"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antijenleri seçiniz...</option>
+                </select>
+              </div>
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="patient-antigensB"
+                id="patient-antigensB"
+              >
+                <label for="patient-antigenChoserB">HLA-B Antijenleri</label>
+                <select
+                  class="form-select js-choice"
+                  id="patient-antigenChoserB"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-b-antigen"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antijenleri seçiniz...</option>
+                </select>
+              </div>
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="patient-antigensDR"
+                id="patient-antigensDR"
+              >
+                <label for="patient-antigenChoserDR">HLA-DR Antijenleri</label>
+                <select
+                  class="form-select js-choice"
+                  id="patient-antigenChoserDR"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-dr-antigen"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antijenleri seçiniz...</option>
+                </select>
+              </div>
+              <div
+                class="tab-pane preview-tab-pane"
+                role="tabpanel"
+                aria-labelledby="patient-antigensDQ"
+                id="patient-antigensDQ"
+              >
+                <label for="patient-antigenChoserDQ">HLA-DQ Antijenleri</label>
+                <select
+                  class="form-select js-choice"
+                  id="patient-antigenChoserDQ"
+                  multiple="multiple"
+                  size="1"
+                  name="hla-dq-antigen"
+                  data-options='{"removeItemButton":true,"placeholder":true}'
+                >
+                  <option value="">Antijenleri seçiniz...</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <div class="border-bottom border-dashed my-3"></div>
+              </div>
+            </div>
+            <!-- Patient PRA Block -->
+            <div class="container mt-3">
+              <h5 class="text-center">PRA Bilgileri</h5>
+              <div class="row gx-2">
+                <!-- PRA Class 1 Section -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label">PRA Sınıf 1</label>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="pra-class1-status"
+                      id="pra-class1-negative"
+                      value="negative"
+                      checked
+                    />
+                    <label class="form-check-label" for="pra-class1-negative">
+                      Negatif
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="pra-class1-status"
+                      id="pra-class1-positive"
+                      value="positive"
+                    />
+                    <label class="form-check-label" for="pra-class1-positive">
+                      Pozitif
+                    </label>
+                  </div>
+                  <div
+                    id="pra-class1-percentage-container"
+                    class="mt-2"
+                    style="display: none"
+                  >
+                    <label class="form-label" for="pra-class1-percentage"
+                      >PRA Sınıf 1 Yüzdesi (%)</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="pra-class1-percentage"
+                        name="pra-class1-percentage"
+                        min="1"
+                        max="100"
+                        placeholder="Yüzde"
+                      />
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PRA Class 2 Section -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label">PRA Sınıf 2</label>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="pra-class2-status"
+                      id="pra-class2-negative"
+                      value="negative"
+                      checked
+                    />
+                    <label class="form-check-label" for="pra-class2-negative">
+                      Negatif
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="pra-class2-status"
+                      id="pra-class2-positive"
+                      value="positive"
+                    />
+                    <label class="form-check-label" for="pra-class2-positive">
+                      Pozitif
+                    </label>
+                  </div>
+                  <div
+                    id="pra-class2-percentage-container"
+                    class="mt-2"
+                    style="display: none"
+                  >
+                    <label class="form-label" for="pra-class2-percentage"
+                      >PRA Sınıf 2 Yüzdesi (%)</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="pra-class2-percentage"
+                        name="pra-class2-percentage"
+                        min="1"
+                        max="100"
+                        placeholder="Yüzde"
+                      />
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="border-bottom border-dashed my-3"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Updated Patient LSA Sınıf 1 Block -->
+            <div class="container mt-3">
+              <h5 class="text-center">LSA Sınıf 1</h5>
+              <div class="row gx-2">
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa1-A"
+                    >LSA-A Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa1-A"
+                    name="lsa1-A"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa1-B"
+                    >LSA-B Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa1-B"
+                    name="lsa1-B"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa1-C"
+                    >LSA-C Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa1-C"
+                    name="lsa1-C"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <div class="border-bottom border-dashed my-3"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Updated Patient LSA Sınıf 2 Block -->
+            <div class="container mt-3">
+              <h5 class="text-center">LSA Sınıf 2</h5>
+              <div class="row gx-2">
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa2-DRB1"
+                    >LSA-DRB1 Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa2-DRB1"
+                    name="lsa2-DRB1"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa2-DQB1"
+                    >LSA-DQB1 Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa2-DQB1"
+                    name="lsa2-DQB1"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="lsa2-DQA1"
+                    >LSA-DQA1 Antijenleri</label
+                  >
+                  <select
+                    class="form-select js-choice"
+                    id="lsa2-DQA1"
+                    name="lsa2-DQA1"
+                    multiple="multiple"
+                    data-options='{"removeItemButton":true,"placeholder":true}'
+                  >
+                    <option value="">Seçiniz...</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
     <!-- DONOR PARTITION -->
     <div class="col-md-12 col-xl-6">
       <div class="card mb-3">
@@ -83,18 +573,32 @@ page_content %}
                     Lütfen donörün kan grubunu seçiniz.
                   </div>
                 </div>
-                <!-- Weight Field -->
+                <!-- TC Field -->
                 <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="weight">Kilo</label>
+                  <label class="form-label" for="tc">TC Kimlik Numarası</label>
                   <input
                     class="form-control"
-                    id="weight"
+                    id="tc"
                     type="number"
-                    name="weight"
-                    placeholder="Kilo"
+                    name="tc"
+                    placeholder="TCKN"
                   />
                   <div class="invalid-feedback">
-                    Lütfen donörün kilosunu giriniz.
+                    Lütfen donörün TC kimlik numarasını giriniz.
+                  </div>
+                </div>
+                <!-- Telephone Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="tel">Telefon Numarası</label>
+                  <input
+                    class="form-control"
+                    id="tel"
+                    type="tel"
+                    name="tel"
+                    placeholder="Telefon Numarası"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen hastanın Telefon numarasını giriniz.
                   </div>
                 </div>
                 <!-- Height Field -->
@@ -111,6 +615,21 @@ page_content %}
                     Lütfen donörün boyunu giriniz.
                   </div>
                 </div>
+                <!-- Weight Field -->
+                <div class="col-sm-6 mb-3">
+                  <label class="form-label" for="weight">Kilo</label>
+                  <input
+                    class="form-control"
+                    id="weight"
+                    type="number"
+                    name="weight"
+                    placeholder="Kilo"
+                  />
+                  <div class="invalid-feedback">
+                    Lütfen donörün kilosunu giriniz.
+                  </div>
+                </div>
+
                 <!-- Occupation Field -->
                 <div class="col-sm-6 mb-3">
                   <label class="form-label" for="occupation">Meslek</label>
@@ -150,6 +669,38 @@ page_content %}
                   </select>
                   <div class="invalid-feedback">
                     Lütfen donörün akrabalık durumunu seçiniz.
+                  </div>
+                </div>
+                <!-- Address Field -->
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="address">Adres</label>
+                  <textarea
+                    class="form-control"
+                    id="address"
+                    type="text"
+                    name="address"
+                    placeholder="Adres"
+                    rows="3"
+                  ></textarea>
+                  <div class="invalid-feedback">
+                    Lütfen donörün adresini giriniz.
+                  </div>
+                </div>
+                <!-- History Field -->
+                <div class="col-sm-12 mb-3">
+                  <label class="form-label" for="history"
+                    >Hastalık Geçmişi</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="history"
+                    type="text"
+                    name="history"
+                    placeholder="Hastalık Geçmişi"
+                    rows="3"
+                  ></textarea>
+                  <div class="invalid-feedback">
+                    Lütfen donörün hastalık geçmişini giriniz.
                   </div>
                 </div>
                 <div class="col-12">
@@ -237,308 +788,7 @@ page_content %}
         </div>
       </div>
     </div>
-    <!-- PATIENT PARTITION -->
-    <div class="col-md-12 col-xl-6">
-      <div class="card mb-3">
-        <div class="card-header">
-          <h3 class="mb-0 text-center"><strong>Hasta Bilgileri</strong></h3>
-        </div>
-        <div class="card-body bg-body-tertiary">
-          <form id="patientForm" class="needs-validation" novalidate>
-            <div class="container mt-3">
-              <h5 class="text-center">Kişisel Bilgiler</h5>
-              <div class="row gx-2">
-                <!-- Name Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-name">Ad</label>
-                  <input
-                    class="form-control"
-                    id="patient-name"
-                    type="text"
-                    name="name"
-                    placeholder="Ad"
-                    required
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen hastanın adını giriniz.
-                  </div>
-                </div>
-                <!-- Surname Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-surname">Soyad</label>
-                  <input
-                    class="form-control"
-                    id="patient-surname"
-                    type="text"
-                    name="surname"
-                    placeholder="Soyad"
-                    required
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen hastanın soyadını giriniz.
-                  </div>
-                </div>
-                <!-- Birthdate Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-birthdate"
-                    >Doğum Tarihi</label
-                  >
-                  <input
-                    class="form-control"
-                    id="patient-birthdate"
-                    type="date"
-                    name="birthdate"
-                    required
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen geçerli bir doğum tarihi giriniz.
-                  </div>
-                </div>
-                <!-- Blood Type Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-blood-type"
-                    >Kan Grubu</label
-                  >
-                  <select
-                    class="form-select"
-                    id="patient-blood-type"
-                    name="blood-type"
-                    required
-                  >
-                    <option value="" selected disabled>Seçiniz...</option>
-                    <option value="A Rh+">A Rh (pozitif)</option>
-                    <option value="A Rh-">A Rh (negatif)</option>
-                    <option value="B Rh+">B Rh (pozitif)</option>
-                    <option value="B Rh-">B Rh (negatif)</option>
-                    <option value="AB Rh+">AB Rh (pozitif)</option>
-                    <option value="AB Rh-">AB Rh (negatif)</option>
-                    <option value="O Rh+">O Rh (pozitif)</option>
-                    <option value="O Rh-">O Rh (negatif)</option>
-                  </select>
-                  <div class="invalid-feedback">
-                    Lütfen hastanın kan grubunu seçiniz.
-                  </div>
-                </div>
-                <!-- Weight Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-weight">Kilo</label>
-                  <input
-                    class="form-control"
-                    id="patient-weight"
-                    type="number"
-                    name="weight"
-                    placeholder="Kilo"
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen hastanın kilosunu giriniz.
-                  </div>
-                </div>
-                <!-- Height Field -->
-                <div class="col-sm-6 mb-3">
-                  <label class="form-label" for="patient-height">Boy</label>
-                  <input
-                    class="form-control"
-                    id="patient-height"
-                    type="number"
-                    name="height"
-                    placeholder="Boy (cm)"
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen hastanın boyunu giriniz.
-                  </div>
-                </div>
-                <!-- Occupation Field -->
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="patient-occupation"
-                    >Meslek</label
-                  >
-                  <input
-                    class="form-control"
-                    id="patient-occupation"
-                    type="text"
-                    name="occupation"
-                    placeholder="Meslek"
-                  />
-                  <div class="invalid-feedback">
-                    Lütfen hastanın mesleğini giriniz.
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="border-bottom border-dashed my-3"></div>
-                </div>
-              </div>
-            </div>
-            <!-- HLA-Antijen Bilgileri for Patient -->
-            <div class="container mt-3">
-              <h5 class="text-center">HLA-Antijen Bilgileri</h5>
-              <div
-                class="tab-pane preview-tab-pane active"
-                role="tabpanel"
-                aria-labelledby="patient-antigensA"
-                id="patient-antigensA"
-              >
-                <label for="patient-antigenChoserA">HLA-A Antijenleri</label>
-                <select
-                  class="form-select js-choice"
-                  id="patient-antigenChoserA"
-                  multiple="multiple"
-                  size="1"
-                  name="hla-a-antigen"
-                  data-options='{"removeItemButton":true,"placeholder":true}'
-                >
-                  <option value="">Antijenleri seçiniz...</option>
-                </select>
-              </div>
-              <div
-                class="tab-pane preview-tab-pane"
-                role="tabpanel"
-                aria-labelledby="patient-antigensB"
-                id="patient-antigensB"
-              >
-                <label for="patient-antigenChoserB">HLA-B Antijenleri</label>
-                <select
-                  class="form-select js-choice"
-                  id="patient-antigenChoserB"
-                  multiple="multiple"
-                  size="1"
-                  name="hla-b-antigen"
-                  data-options='{"removeItemButton":true,"placeholder":true}'
-                >
-                  <option value="">Antijenleri seçiniz...</option>
-                </select>
-              </div>
-              <div
-                class="tab-pane preview-tab-pane"
-                role="tabpanel"
-                aria-labelledby="patient-antigensDR"
-                id="patient-antigensDR"
-              >
-                <label for="patient-antigenChoserDR">HLA-DR Antijenleri</label>
-                <select
-                  class="form-select js-choice"
-                  id="patient-antigenChoserDR"
-                  multiple="multiple"
-                  size="1"
-                  name="hla-dr-antigen"
-                  data-options='{"removeItemButton":true,"placeholder":true}'
-                >
-                  <option value="">Antijenleri seçiniz...</option>
-                </select>
-              </div>
-              <div
-                class="tab-pane preview-tab-pane"
-                role="tabpanel"
-                aria-labelledby="patient-antigensDQ"
-                id="patient-antigensDQ"
-              >
-                <label for="patient-antigenChoserDQ">HLA-DQ Antijenleri</label>
-                <select
-                  class="form-select js-choice"
-                  id="patient-antigenChoserDQ"
-                  multiple="multiple"
-                  size="1"
-                  name="hla-dq-antigen"
-                  data-options='{"removeItemButton":true,"placeholder":true}'
-                >
-                  <option value="">Antijenleri seçiniz...</option>
-                </select>
-              </div>
-              <div class="col-12">
-                <div class="border-bottom border-dashed my-3"></div>
-              </div>
-            </div>
-            <!-- Updated Patient LSA Sınıf 1 Block -->
-            <div class="container mt-3">
-              <h5 class="text-center">LSA Sınıf 1</h5>
-              <div class="row gx-2">
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa1-A">A</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa1-A"
-                    name="lsa1-A"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa1-B">B</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa1-B"
-                    name="lsa1-B"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa1-C">C</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa1-C"
-                    name="lsa1-C"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-                <div class="col-12">
-                  <div class="border-bottom border-dashed my-3"></div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Updated Patient LSA Sınıf 2 Block -->
-            <div class="container mt-3">
-              <h5 class="text-center">LSA Sınıf 2</h5>
-              <div class="row gx-2">
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DRB1">DRB1</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa2-DRB1"
-                    name="lsa2-DRB1"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DQB1">DQB1</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa2-DQB1"
-                    name="lsa2-DQB1"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-                <div class="col-sm-12 mb-3">
-                  <label class="form-label" for="lsa2-DQB2">DQB2</label>
-                  <select
-                    class="form-select js-choice"
-                    id="lsa2-DQB2"
-                    name="lsa2-DQB2"
-                    multiple="multiple"
-                    data-options='{"removeItemButton":true,"placeholder":true}'
-                  >
-                    <option value="">Seçiniz...</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
     <!-- END PARTITIONS -->
     <!-- Combined Submit Button -->
     <div class="text-center my-4">
@@ -560,15 +810,6 @@ page_content %}
       select.appendChild(option);
     }
   }
-  populateOptions("antigenChoserA", "A*", 99);
-  populateOptions("antigenChoserB", "B*", 99);
-  populateOptions("antigenChoserDR", "DRB1*", 99);
-  populateOptions("antigenChoserDQ", "DQB1*", 99);
-  populateOptions("patient-antigenChoserA", "A*", 99);
-  populateOptions("patient-antigenChoserB", "B*", 99);
-  populateOptions("patient-antigenChoserDR", "DRB1*", 99);
-  populateOptions("patient-antigenChoserDQ", "DQB1*", 99);
-
   // Populate LSA Sınıf selections via a dedicated function
   function populateLSAOptions(selectId, prefix, start, end) {
     const select = document.getElementById(selectId);
@@ -581,6 +822,18 @@ page_content %}
       select.appendChild(option);
     }
   }
+
+  populateOptions("antigenChoserA", "A*", 99);
+  populateOptions("antigenChoserB", "B*", 99);
+  populateOptions("antigenChoserDR", "DRB1*", 99);
+  populateOptions("antigenChoserDQ", "DQB1*", 99);
+  populateOptions("antigenChoserDQ", "DQA1*", 99);
+
+  populateOptions("patient-antigenChoserA", "A*", 99);
+  populateOptions("patient-antigenChoserB", "B*", 99);
+  populateOptions("patient-antigenChoserDR", "DRB1*", 99);
+  populateOptions("patient-antigenChoserDQ", "DQA1*", 99);
+
   // LSA Sınıf 1 fields
   populateLSAOptions("lsa1-A", "A", 1, 99);
   populateLSAOptions("lsa1-B", "B", 1, 160);
@@ -588,12 +841,12 @@ page_content %}
   // LSA Sınıf 2 fields
   populateLSAOptions("lsa2-DRB1", "DRB1", 1, 40);
   populateLSAOptions("lsa2-DQB1", "DQB1", 1, 20);
-  populateLSAOptions("lsa2-DQB2", "DQB2", 1, 20);
+  populateLSAOptions("lsa2-DQA1", "DQA1", 1, 20);
 
   // Single combined submit event
   document
     .getElementById("submitAll")
-    .addEventListener("click", function (event) {
+    .addEventListener("click", async function (event) {
       event.preventDefault();
 
       let donorForm = document.getElementById("donorForm");
@@ -608,13 +861,29 @@ page_content %}
       // Gather donor data
       let donorData = {};
       new FormData(donorForm).forEach((value, key) => {
-        donorData[key] = value;
+        if (donorData[key]) {
+          if (Array.isArray(donorData[key])) {
+            donorData[key].push(value);
+          } else {
+            donorData[key] = [donorData[key], value];
+          }
+        } else {
+          donorData[key] = value;
+        }
       });
 
       // Gather patient data
       let patientData = {};
       new FormData(patientForm).forEach((value, key) => {
-        patientData[key] = value;
+        if (patientData[key]) {
+          if (Array.isArray(patientData[key])) {
+            patientData[key].push(value);
+          } else {
+            patientData[key] = [patientData[key], value];
+          }
+        } else {
+          patientData[key] = value;
+        }
       });
 
       // Use donor's relationship-status as bond and create a unique pair_id.
@@ -627,35 +896,34 @@ page_content %}
       donorData["pair_id"] = pairId;
       patientData["pair_id"] = pairId;
 
-      Promise.all([
-        fetch("/db/register-donor", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(donorData),
-        }).then((response) => response.json()),
-        fetch("/db/register-patient", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patientData),
-        }).then((response) => response.json()),
-      ])
-        .then(([donorResponse, patientResponse]) => {
-          showAlert(
-            donorResponse.message + "<br>" + patientResponse.message,
-            "success"
-          );
-          donorForm.reset();
-          patientForm.reset();
-          donorForm.classList.remove("was-validated");
-          patientForm.classList.remove("was-validated");
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          showAlert(
-            "Bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyiniz.",
-            "danger"
-          );
-        });
+      try {
+        // Use the enhanced fetch for both requests
+        const [donorResponse, patientResponse] = await Promise.all([
+          enhancedFetch("/db/register-donor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(donorData),
+          }),
+          enhancedFetch("/db/register-patient", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(patientData),
+          }),
+        ]);
+
+        showAlert("Donör ve Hasta bilgileri başarıyla kaydedildi.", "success");
+        donorForm.reset();
+        patientForm.reset();
+        donorForm.classList.remove("was-validated");
+        patientForm.classList.remove("was-validated");
+      } catch (error) {
+        console.error("Error:", error);
+        showAlert(
+          "Bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyiniz.",
+          "danger"
+        );
+      }
+      window.scrollTo(0, 0);
     });
 
   function showAlert(message, type) {
@@ -666,5 +934,44 @@ page_content %}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
   }
+
+  // Add to the script section at the bottom
+  document.addEventListener("DOMContentLoaded", function () {
+    // PRA Class 1 radio button handling
+    const praClass1Radios = document.querySelectorAll(
+      'input[name="pra-class1-status"]'
+    );
+    const praClass1PercentageContainer = document.getElementById(
+      "pra-class1-percentage-container"
+    );
+
+    praClass1Radios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        if (this.value === "positive") {
+          praClass1PercentageContainer.style.display = "block";
+        } else {
+          praClass1PercentageContainer.style.display = "none";
+        }
+      });
+    });
+
+    // PRA Class 2 radio button handling
+    const praClass2Radios = document.querySelectorAll(
+      'input[name="pra-class2-status"]'
+    );
+    const praClass2PercentageContainer = document.getElementById(
+      "pra-class2-percentage-container"
+    );
+
+    praClass2Radios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        if (this.value === "positive") {
+          praClass2PercentageContainer.style.display = "block";
+        } else {
+          praClass2PercentageContainer.style.display = "none";
+        }
+      });
+    });
+  });
 </script>
 {% endblock %}

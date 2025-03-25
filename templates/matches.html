@@ -27,17 +27,33 @@
     height: 100%;
     z-index: 1;
   }
+  .custom-tooltip-large {
+    max-width: 400px;
+  }
+  .tooltip-content {
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  .tooltip-content h6 {
+    margin-top: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 3px;
+  }
+  .tooltip-content p {
+    margin-bottom: 5px;
+  }
 </style>
 {% endblock %} {% block page_content %}
 <div class="container mt-4 cards-wrapper">
   <div class="row">
-    <div class="col-md-5" id="donors-container">
+    <div class="col-md-4" id="donors-container">
       <h3 class="mb-3">Donörler (Vericiler)</h3>
     </div>
-    <div class="col-md-1" id="arrows-container">
+    <div class="col-md-4" id="arrows-container">
       <!-- SVG overlay for arrows will be inserted here -->
     </div>
-    <div class="col-md-6" id="patients-container">
+    <div class="col-md-4" id="patients-container">
       <h3 class="mb-3">Hastalar (Alıcılar)</h3>
     </div>
   </div>
@@ -84,84 +100,110 @@
     }
 
     function createDonorCard(data) {
-      const card = document.createElement("div");
-      card.className = "card donor-card mb-4 border border-primary";
-      card.innerHTML = `
-        <div class="card-body">
-          <h5 class="card-title">${data.name} ${data.surname}</h5>
-          <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
-            data.birthdate
-          )}</p>
-          <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(
-            data["blood-type"]
-          )}</p>
-          <p class="card-text"><strong>HLA-A Antijen:</strong> ${createBadges(
-            data["hla-a-antigen"]
-          )}</p>
-          <p class="card-text"><strong>HLA-B Antijen:</strong> ${createBadges(
-            data["hla-b-antigen"]
-          )}</p>
-          <p class="card-text"><strong>HLA-DR Antijen:</strong> ${createBadges(
-            data["hla-dr-antigen"]
-          )}</p>
-          <p class="card-text"><strong>HLA-DQ Antijen:</strong> ${createBadges(
-            data["hla-dq-antigen"]
-          )}</p>
-        </div>`;
-      return card;
-    }
+  // Create main card with basic information
+  const card = document.createElement("div");
+  card.className = "card donor-card mb-4 border border-primary";
+  
+  // Create card content with only required fields
+  card.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">${data.name} ${data.surname}</h5>
+      <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+      <p class="card-text"><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
+      <p class="card-text"><strong>TC:</strong> ${data.tc || '-'}</p>
+      <p class="card-text"><strong>Telefon:</strong> ${data.tel || '-'}</p>
+      <p class="card-text"><strong>Boy:</strong> ${data.height || '-'}</p>
+      <p class="card-text"><strong>Kilo:</strong> ${data.weight || '-'}</p>
+    </div>`;
+  
+  // Create tooltip content with all the details
+  const tooltipContent = `
+    <div class="tooltip-content">
+      <h6>Kişisel Bilgiler</h6>
+      <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
+      <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+      <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
+      <p><strong>TC:</strong> ${data.tc || '-'}</p>
+      <p><strong>Telefon:</strong> ${data.tel || '-'}</p>
+      <p><strong>Boy:</strong> ${data.height || '-'}</p>
+      <p><strong>Kilo:</strong> ${data.weight || '-'}</p>
+      <p><strong>Meslek:</strong> ${data.occupation || '-'}</p>
+      <p><strong>Adres:</strong> ${data.address || '-'}</p>
+      <p><strong>Hastalık Geçmişi:</strong> ${data.history || '-'}</p>
+      
+      <h6>HLA Bilgileri</h6>
+      <p><strong>HLA-A Antijen:</strong> ${Array.isArray(data["hla-a-antigen"]) ? data["hla-a-antigen"].join(', ') : (data["hla-a-antigen"] || '-')}</p>
+      <p><strong>HLA-B Antijen:</strong> ${Array.isArray(data["hla-b-antigen"]) ? data["hla-b-antigen"].join(', ') : (data["hla-b-antigen"] || '-')}</p>
+      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || '-'}</p>
+      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || '-'}</p>
+    </div>
+  `;
+  
+  // Enable tooltip on the card
+  card.setAttribute("data-bs-toggle", "tooltip");
+  card.setAttribute("data-bs-html", "true");
+  card.setAttribute("title", tooltipContent);
+  card.setAttribute("data-bs-custom-class", "custom-tooltip-large");
+  
+  return card;
+}
 
-    function createPatientCard(data) {
-      const card = document.createElement("div");
-      card.className = "card patient-card mb-4 border border-primary";
-      card.innerHTML = `
-        <div class="card-body">
-          <h5 class="card-title">${data.name} ${data.surname}</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <p class="card-text"><strong>Doğum Tarihi:</strong> ${
-                data.birthdate
-              }</p>
-              <p class="card-text"><strong>Kan Grubu:</strong> ${createBadges(
-                data["blood-type"]
-              )}</p>
-              <p class="card-text"><strong>HLA-A Antikor:</strong> ${createBadges(
-                data["hla-a-antibody"]
-              )}</p>
-              <p class="card-text"><strong>HLA-B Antikor:</strong> ${createBadges(
-                data["hla-b-antibody"]
-              )}</p>
-              <p class="card-text"><strong>HLA-DR Antikor:</strong> ${createBadges(
-                data["hla-dr-antibody"]
-              )}</p>
-              <p class="card-text"><strong>HLA-DQ Antikor:</strong> ${createBadges(
-                data["hla-dq-antibody"]
-              )}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="card-text"><strong>LSA-A Antikor:</strong> ${createBadges(
-                data["lsa1-A"]
-              )}</p>
-              <p class="card-text"><strong>LSA-B Antikor:</strong> ${createBadges(
-                data["lsa1-B"]
-              )}</p>
-              <p class="card-text"><strong>LSA-C Antikor:</strong> ${createBadges(
-                data["lsa1-C"]
-              )}</p>
-              <p class="card-text"><strong>LSA-DRB1 Antikor:</strong> ${createBadges(
-                data["lsa2-DRB1"]
-              )}</p>
-              <p class="card-text"><strong>LSA-DQB1 Antikor:</strong> ${createBadges(
-                data["lsa2-DQB1"]
-              )}</p>
-              <p class="card-text"><strong>LSA-DRB2 Antikor:</strong> ${createBadges(
-                data["lsa2-DQB2"]
-              )}</p>
-            </div>
-          </div>
-        </div>`;
-      return card;
-    }
+function createPatientCard(data) {
+  // Create main card with basic information
+  const card = document.createElement("div");
+  card.className = "card patient-card mb-4 border border-primary";
+  
+  // Create card content with only required fields
+  card.innerHTML = `
+    <div class="card-body">
+      <h5 class="card-title">${data.name} ${data.surname}</h5>
+      <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+      <p class="card-text"><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
+      <p class="card-text"><strong>TC:</strong> ${data.tc || '-'}</p>
+      <p class="card-text"><strong>Telefon:</strong> ${data.tel || '-'}</p>
+      <p class="card-text"><strong>Boy:</strong> ${data.height || '-'}</p>
+      <p class="card-text"><strong>Kilo:</strong> ${data.weight || '-'}</p>
+    </div>`;
+  
+  // Create tooltip content for all patient details
+  const tooltipContent = `
+    <div class="tooltip-content">
+      <h6>Kişisel Bilgiler</h6>
+      <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
+      <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+      <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
+      <p><strong>TC:</strong> ${data.tc || '-'}</p>
+      <p><strong>Telefon:</strong> ${data.tel || '-'}</p>
+      <p><strong>Boy:</strong> ${data.height || '-'}</p>
+      <p><strong>Kilo:</strong> ${data.weight || '-'}</p>
+      <p><strong>Meslek:</strong> ${data.occupation || '-'}</p>
+      <p><strong>Adres:</strong> ${data.address || '-'}</p>
+      <p><strong>Hastalık Geçmişi:</strong> ${data.history || '-'}</p>
+      
+      <h6>Antijen Bilgileri</h6>
+      <p><strong>HLA-A Antijen:</strong> ${Array.isArray(data["hla-a-antigen"]) ? data["hla-a-antigen"].join(', ') : (data["hla-a-antigen"] || '-')}</p>
+      <p><strong>HLA-B Antijen:</strong> ${Array.isArray(data["hla-b-antigen"]) ? data["hla-b-antigen"].join(', ') : (data["hla-b-antigen"] || '-')}</p>
+      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || '-'}</p>
+      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || '-'}</p>
+      
+      <h6>LSA Antijen Bilgileri</h6>
+      <p><strong>LSA-A Antijen:</strong> ${Array.isArray(data["lsa1-A"]) ? data["lsa1-A"].join(', ') : (data["lsa1-A"] || '-')}</p>
+      <p><strong>LSA-B Antijen:</strong> ${Array.isArray(data["lsa1-B"]) ? data["lsa1-B"].join(', ') : (data["lsa1-B"] || '-')}</p>
+      <p><strong>LSA-C Antijen:</strong> ${Array.isArray(data["lsa1-C"]) ? data["lsa1-C"].join(', ') : (data["lsa1-C"] || '-')}</p>
+      <p><strong>LSA-DRB1 Antijen:</strong> ${Array.isArray(data["lsa2-DRB1"]) ? data["lsa2-DRB1"].join(', ') : (data["lsa2-DRB1"] || '-')}</p>
+      <p><strong>LSA-DQB1 Antijen:</strong> ${Array.isArray(data["lsa2-DQB1"]) ? data["lsa2-DQB1"].join(', ') : (data["lsa2-DQB1"] || '-')}</p>
+      <p><strong>LSA-DRB2 Antijen:</strong> ${Array.isArray(data["lsa2-DQB2"]) ? data["lsa2-DQB2"].join(', ') : (data["lsa2-DQB2"] || '-')}</p>
+    </div>
+  `;
+  
+  // Enable tooltip on the card
+  card.setAttribute("data-bs-toggle", "tooltip");
+  card.setAttribute("data-bs-html", "true");
+  card.setAttribute("title", tooltipContent);
+  card.setAttribute("data-bs-custom-class", "custom-tooltip-large");
+  
+  return card;
+}
 
     function valueMatch(a, b) {
       if (!a || !b) return false;
@@ -173,6 +215,25 @@
         return a === b;
       }
     }
+
+    function displayCards(data, containerId, createCardFunction) {
+      const container = document.getElementById(containerId);
+      data.forEach((item) => {
+        const card = createCardFunction(item);
+        container.appendChild(card);
+      });
+    }
+
+    function initTooltips() {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl, {
+      container: 'body',
+      boundary: 'window',
+      html: true
+    });
+  });
+}
 
     function canDonate(donor, patient) {
       const organCompatibility = {
@@ -211,66 +272,151 @@
         return false;
       if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQB1"]))
         return false;
-      if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQB2"]))
+      if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQA1"]))
         return false;
 
       return true;
     }
-    function displayCards(data, containerId, createCardFunction) {
-      const container = document.getElementById(containerId);
-      data.forEach((item) => {
-        const card = createCardFunction(item);
-        container.appendChild(card);
-      });
+
+    function findExchangeCycles(pairGraph) {
+      const allCycles = [];
+      const maxCycleLength = 10;
+
+      function findCyclesFrom(startNode, currentPath, visited) {
+        const currentNode =
+          currentPath.length > 0
+            ? currentPath[currentPath.length - 1]
+            : startNode;
+
+        if (currentPath.length > 1 && currentNode === startNode) {
+          allCycles.push([...currentPath.slice(0, -1)]);
+          return;
+        }
+
+        if (currentPath.length >= maxCycleLength) {
+          return;
+        }
+
+        for (const neighbor of pairGraph[currentNode]) {
+          if (neighbor === startNode && currentPath.length > 1) {
+            allCycles.push([...currentPath]);
+            continue;
+          }
+
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            currentPath.push(neighbor);
+            findCyclesFrom(startNode, currentPath, visited);
+            currentPath.pop();
+            visited.delete(neighbor);
+          }
+        }
+      }
+
+      for (const startNode of Object.keys(pairGraph)) {
+        const visited = new Set([startNode]);
+        findCyclesFrom(startNode, [startNode], visited);
+      }
+
+      const uniqueCycles = [];
+      const cycleSignatures = new Set();
+
+      for (const cycle of allCycles) {
+        if (cycle.length < 2) continue;
+
+        const sortedCycle = [...cycle].sort();
+        const cycleSignature = sortedCycle.join(",");
+
+        if (!cycleSignatures.has(cycleSignature)) {
+          cycleSignatures.add(cycleSignature);
+          uniqueCycles.push(cycle);
+        }
+      }
+
+      return uniqueCycles;
     }
 
     function computeOptimalMatches(donors, patients) {
-      const graph = donors.map((donor, i) => {
-        const possiblePatients = [];
-        patients.forEach((patient, j) => {
-          if (canDonate(donor, patient)) {
-            possiblePatients.push(j);
-          }
-        });
-        return possiblePatients;
+      const pairs = {};
+      donors.forEach((donor, i) => {
+        if (!pairs[donor.pair_id]) {
+          pairs[donor.pair_id] = { donorIndex: i, patientIndex: null };
+        } else {
+          pairs[donor.pair_id].donorIndex = i;
+        }
       });
 
-      console.log("All possible matches:");
-      graph.forEach((possiblePatients, donorIndex) => {
-        possiblePatients.forEach((patientIndex) => {
+      patients.forEach((patient, j) => {
+        if (!pairs[patient.pair_id]) {
+          pairs[patient.pair_id] = { donorIndex: null, patientIndex: j };
+        } else {
+          pairs[patient.pair_id].patientIndex = j;
+        }
+      });
+
+      const pairIds = Object.keys(pairs);
+      const pairGraph = {};
+
+      pairIds.forEach((pairId1) => {
+        pairGraph[pairId1] = [];
+        pairIds.forEach((pairId2) => {
+          if (pairId1 !== pairId2) {
+            const donor1 = donors[pairs[pairId1].donorIndex];
+            const patient2 = patients[pairs[pairId2].patientIndex];
+
+            if (canDonate(donor1, patient2)) {
+              pairGraph[pairId1].push(pairId2);
+            }
+          }
+        });
+      });
+
+      console.log("Possible pair exchanges:");
+      Object.keys(pairGraph).forEach((pairId1) => {
+        pairGraph[pairId1].forEach((pairId2) => {
           console.log(
-            `Donor ${donorIndex} can donate to Patient ${patientIndex}`
+            `Pair ${pairId1}'s donor can donate to Pair ${pairId2}'s patient`
           );
         });
       });
 
-      const matchR = Array(patients.length).fill(-1);
+      const validCycles = findExchangeCycles(pairGraph);
+      console.log("Valid exchange cycles:", validCycles);
 
-      function bpm(u, seen) {
-        for (let v of graph[u]) {
-          if (!seen[v]) {
-            seen[v] = true;
-            if (matchR[v] === -1 || bpm(matchR[v], seen)) {
-              matchR[v] = u;
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-
-      for (let u = 0; u < donors.length; u++) {
-        const seen = Array(patients.length).fill(false);
-        bpm(u, seen);
-      }
+      const selectedCycles = findOptimalCycleCombination(validCycles);
 
       const matches = [];
-      for (let v = 0; v < patients.length; v++) {
-        if (matchR[v] !== -1) {
-          matches.push({ donorIndex: matchR[v], patientIndex: v });
+
+      for (const cycle of selectedCycles) {
+        for (let i = 0; i < cycle.length; i++) {
+          const givingPairId = cycle[i];
+          const receivingPairId = cycle[(i + 1) % cycle.length];
+
+          matches.push({
+            donorIndex: pairs[givingPairId].donorIndex,
+            patientIndex: pairs[receivingPairId].patientIndex,
+          });
         }
       }
       return matches;
+    }
+
+    function findOptimalCycleCombination(validCycles) {
+      validCycles.sort((a, b) => b.length - a.length);
+
+      const selectedCycles = [];
+      const usedPairs = new Set();
+
+      for (const cycle of validCycles) {
+        if (cycle.some((pairId) => usedPairs.has(pairId))) {
+          continue;
+        }
+        selectedCycles.push(cycle);
+        for (const pairId of cycle) {
+          usedPairs.add(pairId);
+        }
+      }
+      return selectedCycles;
     }
 
     function createSVGOverlay() {
@@ -362,6 +508,7 @@
     setTimeout(updateArrows, 100);
 
     window.addEventListener("resize", updateArrows);
+    initTooltips();
   });
 </script>
 {% endblock %}
