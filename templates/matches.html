@@ -4,17 +4,7 @@
     --arrow-color: var(--falcon-primary-text-emphasis);
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --arrow-color: var(--falcon-primary-text-emphasis);
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      --arrow-color: var(--falcon-primary-text-emphasis);
-    }
-  }
+  /* Hover effects for better usability */
   .cards-wrapper {
     position: relative;
   }
@@ -58,35 +48,13 @@
     position: relative;
     z-index: 11;
   }
-  /* Add to existing styles */
-  .donor-card .form-check-input,
-  .patient-card .form-check-input {
-    width: 1.5rem;
-    height: 1.5rem;
-    cursor: pointer;
-    border-width: 2px;
-  }
 
-  .donor-card .form-check-input:checked,
-  .patient-card .form-check-input:checked {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-  }
-
-  /* Add a slight rotation to checkboxes for visual interest */
   .donor-card .form-check {
     transform: rotate(5deg);
   }
 
   .patient-card .form-check {
     transform: rotate(-5deg);
-  }
-
-  /* Highlight cards with checked checkboxes */
-  .donor-card:has(.form-check-input:checked),
-  .patient-card:has(.form-check-input:checked) {
-    border-width: 2px !important;
-    box-shadow: 0 0 8px rgba(var(--bs-primary-rgb), 0.5);
   }
 
   /* Improve the arrow display */
@@ -322,6 +290,20 @@
       }</p>
       <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || "-"}</p>
       <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || "-"}</p>
+
+      <h6>PRA Bilgileri</h6>
+      <p><strong>PRA Sınıf I Durumu:</strong> ${
+        data["pra-class1-status"] || "negative"
+      }</p>
+  <p><strong>PRA Sınıf I Yüzdesi:</strong> ${
+    data["pra-class1-percentage"] || "-"
+  }</p>
+  <p><strong>PRA Sınıf II Durumu:</strong> ${
+    data["pra-class2-status"] || "negative"
+  }</p>
+  <p><strong>PRA Sınıf II Yüzdesi:</strong> ${
+    data["pra-class2-percentage"] || "-"
+  }</p>
       
       <h6>LSA Antijen Bilgileri</h6>
       <p><strong>LSA-A Antijen:</strong> ${
@@ -362,6 +344,7 @@
 
       return card;
     }
+
     function valueMatch(a, b) {
       if (!a || !b) return false;
       if (Array.isArray(a)) {
