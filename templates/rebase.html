@@ -32,8 +32,14 @@
     <!-- ===============================================-->
     <!--    Stylesheets-->
     <!-- ===============================================-->
-    <link href="{{ url_for('static', filename='vendors/choices/choices.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='vendors/prism/prism-okaidia.css') }}" rel="stylesheet">
+    <link
+      href="{{ url_for('static', filename='vendors/choices/choices.min.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='vendors/prism/prism-okaidia.css') }}"
+      rel="stylesheet"
+    />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700%7cPoppins:300,400,500,600,700,800,900&amp;display=swap"
@@ -144,11 +150,11 @@
               class="navbar-nav"
               data-top-nav-dropdowns="data-top-nav-dropdowns"
             >
-            <li class="nav-item">
-              <a class="nav-link link-600 fw-medium" href="/register-tuple"
-                >Veri Ekleme</a
-              >
-            </li>
+              <li class="nav-item">
+                <a class="nav-link link-600 fw-medium" href="/register-tuple"
+                  >Veri Ekleme</a
+                >
+              </li>
               <li class="nav-item">
                 <a class="nav-link link-600 fw-medium" href="/matches"
                   >Eşleşmeler</a
@@ -162,6 +168,7 @@
             </ul>
           </div>
 
+          <!-- UTILITY SECTION-->
           <!-- UTILITY SECTION-->
           <ul
             class="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center"
@@ -227,6 +234,52 @@
                 </div>
               </div>
             </li>
+
+            <!-- CONTACT US SECTION-->
+            <li class="nav-item d-none d-sm-block">
+              <a
+                class="nav-link px-0 fa-icon-wait"
+                href="mailto:veyselr.cacan@gmail.com"
+              >
+                <span
+                  class="fas fa-comments"
+                  style="font-size: 33px; transform-origin: 0.5625em 0.5em"
+                  data-fa-transform="shrink-7"
+                ></span>
+              </a>
+            </li>
+
+            <!-- PROFILE SECTION-->
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link pe-0 ps-2"
+                id="navbarDropdownUser"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span
+                  class="fas fa-user"
+                  data-fa-transform="shrink-6"
+                  style="font-size: 33px"
+                ></span>
+              </a>
+              <div
+                class="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end py-0"
+                aria-labelledby="navbarDropdownUser"
+              >
+                <div class="bg-white dark__bg-1000 rounded-2 py-2">
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#!" onclick="logoutUser()"
+                    >Çıkış Yap</a
+                  >
+                  <div class="dropdown-item-text">
+                    Merhaba <strong>{{ username }}</strong>!
+                  </div>
+                </div>
+              </div>
+            </li>
           </ul>
         </nav>
         {% endblock %}
@@ -260,6 +313,22 @@
   <script src="{{ url_for('static', filename='js/chillyfeely.js') }}"></script>
 
   <script>
+    function logoutUser() {
+      fetch("/db/logout", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status) {
+            // Redirect to the login page or show a message
+            window.location.href = "/login";
+          } else {
+            alert("Failed to log out: " + data.message);
+          }
+        })
+        .catch((error) => console.error("Error:", error));
+    }
     function getBodyBgColor() {
       return getComputedStyle(document.documentElement)
         .getPropertyValue("--falcon-primary")

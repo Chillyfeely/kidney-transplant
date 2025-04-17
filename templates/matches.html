@@ -7,6 +7,12 @@
   /* Hover effects for better usability */
   .cards-wrapper {
     position: relative;
+    /* Initially hidden */
+    display: none;
+  }
+  .pair-list-wrapper {
+    /* Initially visible */
+    display: block;
   }
   .arrows-overlay {
     position: absolute;
@@ -68,37 +74,102 @@
       stroke-dashoffset: -100;
     }
   }
+
+  /* Styles for the new pair list */
+  .pair-item {
+  border: 1px solid var(--falcon-border-color);
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+  /* background-color: var(--falcon-card-bg); */
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
+}
+  .pair-info {
+    flex-grow: 1;
+    margin-left: 15px;
+  }
+  .pair-actions button {
+    margin-left: 5px;
+  }
+  .pair-details {
+  font-size: 0.9em;
+  /* color: var(--falcon-card-bg); */
+}
+  .pair-item.hidden {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    border: none;
+  }
 </style>
 {% endblock %} {% block page_content %}
-<div class="container mt-4 cards-wrapper">
+<div class="container mt-4">
+  <!-- Control Header -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="card">
         <div class="card-body">
           <h4 class="card-title">Eşleştirme Kontrolleri</h4>
           <div class="row align-items-center">
-            <div class="col-md-3 mb-2">
-              <span id="donor-selection-count" class="badge bg-primary me-2"
+            <div class="col-md-4 mb-2">
+              <span id="pair-selection-count" class="badge bg-primary me-2"
                 >0</span
               >
-              Donör seçildi
+              Çift seçildi
             </div>
-            <div class="col-md-3 mb-2">
-              <span id="patient-selection-count" class="badge bg-primary me-2"
-                >0</span
+            <div class="col-md-8 text-end">
+              <button
+                id="back-to-list-btn"
+                class="btn btn-outline-secondary me-2"
+                style="display: none"
               >
-              Hasta seçildi
-            </div>
-            <div class="col-md-6 text-end">
+                Çift Listesine Dön
+              </button>
               <button
                 id="clear-selection-btn"
                 class="btn btn-outline-secondary me-2"
               >
                 Seçimi Temizle
               </button>
-              <button id="match-selected-btn" class="btn btn-primary">
-                Seçilenleri Eşleştir
+              <button id="prepare-match-btn" class="btn btn-primary">
+                Seçilen Çiftleri Eşleştirmeye Hazırla
               </button>
+              <button
+                id="run-match-btn"
+                class="btn btn-success"
+                style="display: none"
+              >
+                Eşleştirmeyi Çalıştır
+              </button>
+            </div>
+          </div>
+          <!-- Info area for card view -->
+          <div
+            id="card-view-info"
+            class="row align-items-center mt-3"
+            style="display: none"
+          >
+            <div class="col-md-3 mb-2">
+              <span id="donor-selection-count" class="badge bg-primary me-2"
+                >0</span
+              >
+              Donör Görüntüleniyor
+            </div>
+            <div class="col-md-3 mb-2">
+              <span id="patient-selection-count" class="badge bg-primary me-2"
+                >0</span
+              >
+              Hasta Görüntüleniyor
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted mb-0">
+                Eşleştirme için hazırlanan çiftler aşağıdadır. Eşleştirmeyi
+                çalıştırmak için butona basın.
+              </p>
             </div>
           </div>
         </div>
@@ -106,38 +177,114 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-4" id="patients-container">
-      <h3 class="mb-3">Hastalar (Alıcılar)</h3>
-    </div>
+  <!-- Pair List View -->
+  <div class="pair-list-wrapper">
+    <h3 class="mb-3">Hasta-Donör Çiftleri</h3>
 
-    <div class="col-md-4" id="arrows-container">
-      <!-- SVG overlay for arrows will be inserted here -->
+    <!-- == NEW: Search Input == -->
+    <div class="mb-3">
+      <input
+        type="text"
+        id="pair-search-input"
+        class="form-control"
+        placeholder="Hasta veya Donör ad/soyadıyla ara (örn: 'Ahmet Yılmaz')..."
+      />
     </div>
-    <div class="col-md-4" id="donors-container">
-      <h3 class="mb-3">Donörler (Vericiler)</h3>
+    <!-- ======================= -->
+
+    <div id="pair-list-container">
+      <!-- Pair items will be injected here by JS -->
+      <p>Çiftler yükleniyor...</p>
+    </div>
+    <div
+      id="no-results-message"
+      class="alert alert-warning mt-3"
+      style="display: none"
+    >
+      Arama kriterlerine uygun çift bulunamadı.
+    </div>
+  </div>
+
+  <!-- Card View (for selected pairs, initially hidden) -->
+  <div class="cards-wrapper">
+    <div class="row">
+      <div class="col-md-4" id="patients-container">
+        <h3 class="mb-3">Seçilen Hastalar</h3>
+      </div>
+      <div class="col-md-4">
+      </div>
+
+      <div class="col-md-4" id="donors-container">
+        <h3 class="mb-3">Seçilen Donörler</h3>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Modal for Details -->
+<div
+  class="modal fade"
+  id="detailsModal"
+  tabindex="-1"
+  aria-labelledby="detailsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsModalLabel">Detaylar</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body" id="detailsModalBody">
+        <!-- Tooltip content will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Kapat
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %} {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", async () => {
+    let allDonors = [];
+    let allPatients = [];
+    let allPairs = []; // Structure: { pair_id: string, patient: object, donor: object, patientIndex: number, donorIndex: number }
+    let selectedPairsData = []; // Holds the data for pairs selected for matching view
+    let fuseInstance = null; // To hold the Fuse.js instance
+    let searchDebounceTimer = null; // For debouncing search input
+    let currentMatches = [];
+    // --- Data Fetching and Utility Functions (mostly unchanged) ---
     async function fetchData(url, key) {
+      // ... (keep your existing fetchData function)
       try {
         const response = await fetch(url);
         const data = await response.json();
         if (data.status) {
-          localStorage.setItem(key, JSON.stringify(data[key]));
+          localStorage.setItem(key, JSON.stringify(data[key])); // Optional: Keep caching if needed
           return data[key];
         } else {
           console.error(`Failed to fetch ${key}:`, data.message);
+          return null; // Return null on failure
         }
       } catch (error) {
         console.error(`Error fetching ${key}:`, error);
+        return null; // Return null on error
       }
     }
 
     function formatDate(dateString) {
+      // ... (keep your existing formatDate function)
+      if (!dateString) return "-";
       const date = new Date(dateString);
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -146,6 +293,7 @@
     }
 
     function createBadges(value) {
+      // ... (keep your existing createBadges function)
       if (!value || (Array.isArray(value) && value.length === 0)) {
         return `<span class="badge rounded-pill badge-subtle-warning">Yok</span>`;
       }
@@ -160,192 +308,333 @@
       return `<span class="badge rounded-pill badge-subtle-info">${value}</span>`;
     }
 
+    // --- Tooltip/Modal Content Generation ---
+    function getDetailContent(data, type) {
+      // Reuses the logic from your tooltip content generation
+      const isPatient = type === "patient";
+      let content = `
+        <div class="tooltip-content">
+          <h6>Kişisel Bilgiler (${isPatient ? "Hasta" : "Donör"})</h6>
+          <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
+          <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
+          <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
+          <p><strong>TC:</strong> ${data.tc || "-"}</p>
+          <p><strong>Telefon:</strong> ${data.tel || "-"}</p>
+          <p><strong>Boy:</strong> ${data.height || "-"}</p>
+          <p><strong>Kilo:</strong> ${data.weight || "-"}</p>
+          <p><strong>Meslek:</strong> ${data.occupation || "-"}</p>
+          <p><strong>Adres:</strong> ${data.address || "-"}</p>
+          <p><strong>Hastalık Geçmişi:</strong> ${data.history || "-"}</p>
+
+          <h6>HLA Bilgileri</h6>
+          <p><strong>HLA-A Antijen:</strong> ${
+            Array.isArray(data["hla-a-antigen"])
+              ? data["hla-a-antigen"].join(", ")
+              : data["hla-a-antigen"] || "-"
+          }</p>
+          <p><strong>HLA-B Antijen:</strong> ${
+            Array.isArray(data["hla-b-antigen"])
+              ? data["hla-b-antigen"].join(", ")
+              : data["hla-b-antigen"] || "-"
+          }</p>
+          <p><strong>HLA-DR Antijen:</strong> ${
+            data["hla-dr-antigen"] || "-"
+          }</p>
+          <p><strong>HLA-DQ Antijen:</strong> ${
+            data["hla-dq-antigen"] || "-"
+          }</p>`;
+
+      if (isPatient) {
+        content += `
+          <h6>PRA Bilgileri</h6>
+          <p><strong>PRA Sınıf I Durumu:</strong> ${
+            data["pra-class1-status"] || "negative"
+          }</p>
+          <p><strong>PRA Sınıf I Yüzdesi:</strong> ${
+            data["pra-class1-percentage"] || "-"
+          }</p>
+          <p><strong>PRA Sınıf II Durumu:</strong> ${
+            data["pra-class2-status"] || "negative"
+          }</p>
+          <p><strong>PRA Sınıf II Yüzdesi:</strong> ${
+            data["pra-class2-percentage"] || "-"
+          }</p>
+
+          <h6>LSA Antijen Bilgileri</h6>
+          <p><strong>LSA-A Antijen:</strong> ${
+            Array.isArray(data["lsa1-A"])
+              ? data["lsa1-A"].join(", ")
+              : data["lsa1-A"] || "-"
+          }</p>
+          <p><strong>LSA-B Antijen:</strong> ${
+            Array.isArray(data["lsa1-B"])
+              ? data["lsa1-B"].join(", ")
+              : data["lsa1-B"] || "-"
+          }</p>
+          <p><strong>LSA-C Antijen:</strong> ${
+            Array.isArray(data["lsa1-C"])
+              ? data["lsa1-C"].join(", ")
+              : data["lsa1-C"] || "-"
+          }</p>
+          <p><strong>LSA-DRB1 Antijen:</strong> ${
+            Array.isArray(data["lsa2-DRB1"])
+              ? data["lsa2-DRB1"].join(", ")
+              : data["lsa2-DRB1"] || "-"
+          }</p>
+          <p><strong>LSA-DQB1 Antijen:</strong> ${
+            Array.isArray(data["lsa2-DQB1"])
+              ? data["lsa2-DQB1"].join(", ")
+              : data["lsa2-DQB1"] || "-"
+          }</p>
+          <p><strong>LSA-DRB2 Antijen:</strong> ${
+            Array.isArray(data["lsa2-DQB2"])
+              ? data["lsa2-DQB2"].join(", ")
+              : data["lsa2-DQB2"] || "-"
+          }</p>
+        `;
+      }
+      content += `</div>`;
+      return content;
+    }
+
+    // --- Card Creation Functions (keep for the second stage view) ---
     function createDonorCard(data) {
-      // Create main card with basic information
+      // ... (keep your existing createDonorCard function, but remove checkbox logic or hide it)
       const card = document.createElement("div");
       card.className =
         "card donor-card mb-4 border border-primary position-relative";
+      // Use a unique ID based on original data, not just index
       card.dataset.id = data.id || data._id || data.pair_id;
-
-      // Create card content with right-aligned checkbox and separate tooltip target
+      // Removed checkbox from here, as selection happens at pair level
       card.innerHTML = `
-    <div class="card-body pe-5"> <!-- Add padding to right side for checkbox -->
-      <div class="form-check position-absolute top-0 end-0 mt-2 me-2">
-        <input class="form-check-input donor-checkbox" type="checkbox" id="donor-${
-          card.dataset.id
-        }">
-        <label class="form-check-label" for="donor-${card.dataset.id}"></label>
-      </div>
-      <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
-        <h5 class="card-title">${data.name} ${data.surname}</h5>
-        <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
-          data.birthdate
-        )}</p>
-        <p class="card-text"><strong>Kan Grubu:</strong> ${
-          data["blood-type"]
-        }</p>
-        <p class="card-text"><strong>TC:</strong> ${data.tc || "-"}</p>
-        <p class="card-text"><strong>Telefon:</strong> ${data.tel || "-"}</p>
-        <p class="card-text"><strong>Boy:</strong> ${data.height || "-"}</p>
-        <p class="card-text"><strong>Kilo:</strong> ${data.weight || "-"}</p>
-      </div>
-    </div>`;
-
-      // Create tooltip content with all the details (unchanged)
-      const tooltipContent = `
-    <div class="tooltip-content">
-      <h6>Kişisel Bilgiler</h6>
-      <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
-      <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
-      <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p><strong>TC:</strong> ${data.tc || "-"}</p>
-      <p><strong>Telefon:</strong> ${data.tel || "-"}</p>
-      <p><strong>Boy:</strong> ${data.height || "-"}</p>
-      <p><strong>Kilo:</strong> ${data.weight || "-"}</p>
-      <p><strong>Meslek:</strong> ${data.occupation || "-"}</p>
-      <p><strong>Adres:</strong> ${data.address || "-"}</p>
-      <p><strong>Hastalık Geçmişi:</strong> ${data.history || "-"}</p>
-      
-      <h6>HLA Bilgileri</h6>
-      <p><strong>HLA-A Antijen:</strong> ${
-        Array.isArray(data["hla-a-antigen"])
-          ? data["hla-a-antigen"].join(", ")
-          : data["hla-a-antigen"] || "-"
-      }</p>
-      <p><strong>HLA-B Antijen:</strong> ${
-        Array.isArray(data["hla-b-antigen"])
-          ? data["hla-b-antigen"].join(", ")
-          : data["hla-b-antigen"] || "-"
-      }</p>
-      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || "-"}</p>
-      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || "-"}</p>
-    </div>
-  `;
-
-      // Set the tooltip content to the card-info div
+            <div class="card-body">
+                <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
+                    <h5 class="card-title">${data.name} ${data.surname}</h5>
+                    <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
+                      data.birthdate
+                    )}</p>
+                    <p class="card-text"><strong>Kan Grubu:</strong> ${
+                      data["blood-type"]
+                    }</p>
+                    <p class="card-text"><strong>TC:</strong> ${
+                      data.tc || "-"
+                    }</p>
+                    <p class="card-text"><strong>Telefon:</strong> ${
+                      data.tel || "-"
+                    }</p>
+                </div>
+            </div>`;
+      const tooltipContent = getDetailContent(data, "donor");
       card.querySelector(".card-info").setAttribute("title", tooltipContent);
-
       return card;
     }
 
-    // Modified createPatientCard function with left-aligned checkbox
     function createPatientCard(data) {
-      // Create main card with basic information
+      // ... (keep your existing createPatientCard function, but remove checkbox logic or hide it)
       const card = document.createElement("div");
       card.className =
         "card patient-card mb-4 border border-primary position-relative";
       card.dataset.id = data.id || data._id || data.pair_id;
-
-      // Create card content with left-aligned checkbox and separate tooltip target
+      // Removed checkbox from here
       card.innerHTML = `
-    <div class="card-body ps-5"> <!-- Add padding to left side for checkbox -->
-      <div class="form-check position-absolute top-0 start-0 mt-2 ms-2">
-        <input class="form-check-input patient-checkbox" type="checkbox" id="patient-${
-          card.dataset.id
-        }">
-        <label class="form-check-label" for="patient-${
-          card.dataset.id
-        }"></label>
-      </div>
-      <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
-        <h5 class="card-title">${data.name} ${data.surname}</h5>
-        <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
-          data.birthdate
-        )}</p>
-        <p class="card-text"><strong>Kan Grubu:</strong> ${
-          data["blood-type"]
-        }</p>
-        <p class="card-text"><strong>TC:</strong> ${data.tc || "-"}</p>
-        <p class="card-text"><strong>Telefon:</strong> ${data.tel || "-"}</p>
-        <p class="card-text"><strong>Boy:</strong> ${data.height || "-"}</p>
-        <p class="card-text"><strong>Kilo:</strong> ${data.weight || "-"}</p>
-      </div>
-    </div>`;
-
-      // Create tooltip content for all patient details (unchanged)
-      const tooltipContent = `
-    <div class="tooltip-content">
-      <h6>Kişisel Bilgiler</h6>
-      <p><strong>Ad Soyad:</strong> ${data.name} ${data.surname}</p>
-      <p><strong>Doğum Tarihi:</strong> ${formatDate(data.birthdate)}</p>
-      <p><strong>Kan Grubu:</strong> ${data["blood-type"]}</p>
-      <p><strong>TC:</strong> ${data.tc || "-"}</p>
-      <p><strong>Telefon:</strong> ${data.tel || "-"}</p>
-      <p><strong>Boy:</strong> ${data.height || "-"}</p>
-      <p><strong>Kilo:</strong> ${data.weight || "-"}</p>
-      <p><strong>Meslek:</strong> ${data.occupation || "-"}</p>
-      <p><strong>Adres:</strong> ${data.address || "-"}</p>
-      <p><strong>Hastalık Geçmişi:</strong> ${data.history || "-"}</p>
-      
-      <h6>Antijen Bilgileri</h6>
-      <p><strong>HLA-A Antijen:</strong> ${
-        Array.isArray(data["hla-a-antigen"])
-          ? data["hla-a-antigen"].join(", ")
-          : data["hla-a-antigen"] || "-"
-      }</p>
-      <p><strong>HLA-B Antijen:</strong> ${
-        Array.isArray(data["hla-b-antigen"])
-          ? data["hla-b-antigen"].join(", ")
-          : data["hla-b-antigen"] || "-"
-      }</p>
-      <p><strong>HLA-DR Antijen:</strong> ${data["hla-dr-antigen"] || "-"}</p>
-      <p><strong>HLA-DQ Antijen:</strong> ${data["hla-dq-antigen"] || "-"}</p>
-
-      <h6>PRA Bilgileri</h6>
-      <p><strong>PRA Sınıf I Durumu:</strong> ${
-        data["pra-class1-status"] || "negative"
-      }</p>
-  <p><strong>PRA Sınıf I Yüzdesi:</strong> ${
-    data["pra-class1-percentage"] || "-"
-  }</p>
-  <p><strong>PRA Sınıf II Durumu:</strong> ${
-    data["pra-class2-status"] || "negative"
-  }</p>
-  <p><strong>PRA Sınıf II Yüzdesi:</strong> ${
-    data["pra-class2-percentage"] || "-"
-  }</p>
-      
-      <h6>LSA Antijen Bilgileri</h6>
-      <p><strong>LSA-A Antijen:</strong> ${
-        Array.isArray(data["lsa1-A"])
-          ? data["lsa1-A"].join(", ")
-          : data["lsa1-A"] || "-"
-      }</p>
-      <p><strong>LSA-B Antijen:</strong> ${
-        Array.isArray(data["lsa1-B"])
-          ? data["lsa1-B"].join(", ")
-          : data["lsa1-B"] || "-"
-      }</p>
-      <p><strong>LSA-C Antijen:</strong> ${
-        Array.isArray(data["lsa1-C"])
-          ? data["lsa1-C"].join(", ")
-          : data["lsa1-C"] || "-"
-      }</p>
-      <p><strong>LSA-DRB1 Antijen:</strong> ${
-        Array.isArray(data["lsa2-DRB1"])
-          ? data["lsa2-DRB1"].join(", ")
-          : data["lsa2-DRB1"] || "-"
-      }</p>
-      <p><strong>LSA-DQB1 Antijen:</strong> ${
-        Array.isArray(data["lsa2-DQB1"])
-          ? data["lsa2-DQB1"].join(", ")
-          : data["lsa2-DQB1"] || "-"
-      }</p>
-      <p><strong>LSA-DRB2 Antijen:</strong> ${
-        Array.isArray(data["lsa2-DQB2"])
-          ? data["lsa2-DQB2"].join(", ")
-          : data["lsa2-DQB2"] || "-"
-      }</p>
-    </div>
-  `;
-
-      // Set the tooltip content to the card-info div
+            <div class="card-body">
+                <div class="card-info" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="custom-tooltip-large">
+                    <h5 class="card-title">${data.name} ${data.surname}</h5>
+                    <p class="card-text"><strong>Doğum Tarihi:</strong> ${formatDate(
+                      data.birthdate
+                    )}</p>
+                    <p class="card-text"><strong>Kan Grubu:</strong> ${
+                      data["blood-type"]
+                    }</p>
+                    <p class="card-text"><strong>TC:</strong> ${
+                      data.tc || "-"
+                    }</p>
+                    <p class="card-text"><strong>Telefon:</strong> ${
+                      data.tel || "-"
+                    }</p>
+                </div>
+            </div>`;
+      const tooltipContent = getDetailContent(data, "patient");
       card.querySelector(".card-info").setAttribute("title", tooltipContent);
-
       return card;
     }
 
+    // --- NEW: Pair List Creation ---
+    function createPairItem(pairData) {
+      const item = document.createElement("div");
+      item.className = "card pair-item";
+      item.dataset.pairId = pairData.pair_id; // Keep ID in dataset
+
+      const patientName = pairData.patient
+        ? `${pairData.patient.name} ${pairData.patient.surname}`
+        : "Hasta Bilgisi Yok";
+      const donorName = pairData.donor
+        ? `${pairData.donor.name} ${pairData.donor.surname}`
+        : "Donör Bilgisi Yok";
+      const patientBlood = pairData.patient
+        ? pairData.patient["blood-type"]
+        : "-";
+      const donorBlood = pairData.donor ? pairData.donor["blood-type"] : "-";
+
+      // == MODIFIED: Removed the h5 line displaying the raw pair_id ==
+      item.innerHTML = `
+            <div class="form-check">
+                <input class="form-check-input pair-checkbox" type="checkbox" id="pair-${
+                  pairData.pair_id
+                }" data-pair-id="${pairData.pair_id}">
+                <label class="form-check-label" for="pair-${
+                  pairData.pair_id
+                }"></label>
+            </div>
+            <div class="pair-info">
+                <!-- <h5>Çift ID: ${
+                  pairData.pair_id
+                }</h5> --> <!-- REMOVED THIS LINE -->
+                <div class="pair-details">
+                    <p class="mb-1"><strong>Hasta:</strong> ${patientName} (Kan: ${patientBlood})</p>
+                    <p class="mb-0"><strong>Donör:</strong> ${donorName} (Kan: ${donorBlood})</p>
+                </div>
+            </div>
+            <div class="pair-actions">
+                ${
+                  pairData.patient
+                    ? `<button class="btn btn-sm btn-outline-info view-details-btn" data-type="patient" data-pair-id="${pairData.pair_id}">Hasta Detay</button>`
+                    : ""
+                }
+                ${
+                  pairData.donor
+                    ? `<button class="btn btn-sm btn-outline-info view-details-btn" data-type="donor" data-pair-id="${pairData.pair_id}">Donör Detay</button>`
+                    : ""
+                }
+            </div>
+        `;
+      
+        return item;
+    }
+
+    // Modified to accept a list of pairs to display
+    function displayPairList(pairsToDisplay) {
+      const container = document.getElementById("pair-list-container");
+      const noResultsMsg = document.getElementById("no-results-message");
+      container.innerHTML = ""; // Clear previous list
+
+      if (!pairsToDisplay || pairsToDisplay.length === 0) {
+        // Show message only if the list is supposed to contain items (i.e., not during initial load)
+        if (allPairs.length > 0) {
+          // Check if data has loaded
+          noResultsMsg.style.display = "block";
+        } else {
+          container.innerHTML =
+            "<p>Çiftler yükleniyor veya hiç çift bulunamadı.</p>";
+          noResultsMsg.style.display = "none";
+        }
+        return;
+      }
+
+      noResultsMsg.style.display = "none"; // Hide no results message
+      pairsToDisplay.forEach((pair) => {
+        // If Fuse.js results are passed, extract the original item
+        const pairData = pair.item ? pair.item : pair;
+        const item = createPairItem(pairData);
+        container.appendChild(item);
+      });
+
+      // Re-attach handlers for the newly rendered items
+      setupPairSelectionHandlers();
+      setupDetailModalTriggers();
+    }
+
+    // --- Display Cards (modified for selected pairs) ---
+    function displaySelectedCards(selectedPairs) {
+      const patientsContainer = document.getElementById("patients-container");
+      const donorsContainer = document.getElementById("donors-container");
+      patientsContainer.innerHTML = '<h3 class="mb-3">Seçilen Hastalar</h3>'; // Reset content
+      donorsContainer.innerHTML = '<h3 class="mb-3">Seçilen Donörler</h3>'; // Reset content
+      clearArrows(); // Clear previous arrows
+
+      selectedPairsData = []; // Reset data holder for the current card view
+
+      selectedPairs.forEach((pair) => {
+        if (pair.patient) {
+          const patientCard = createPatientCard(pair.patient);
+          patientsContainer.appendChild(patientCard);
+        }
+        if (pair.donor) {
+          const donorCard = createDonorCard(pair.donor);
+          donorsContainer.appendChild(donorCard);
+        }
+        // Store the data in the order it will be used by computeOptimalMatches
+        selectedPairsData.push(pair);
+      });
+
+      // Update counts for the card view header
+      document.getElementById("patient-selection-count").textContent =
+        selectedPairs.filter((p) => p.patient).length;
+      document.getElementById("donor-selection-count").textContent =
+        selectedPairs.filter((p) => p.donor).length;
+
+      initTooltips(); // Re-initialize tooltips for the newly created cards
+    }
+
+    // --- Selection Handlers ---
+    function setupPairSelectionHandlers() {
+      const pairCheckboxes = document.querySelectorAll(".pair-checkbox");
+      const pairSelectionCount = document.getElementById(
+        "pair-selection-count"
+      );
+      const prepareMatchBtn = document.getElementById("prepare-match-btn");
+
+      function updatePairSelection() {
+        const selectedCount = document.querySelectorAll(
+          ".pair-checkbox:checked"
+        ).length;
+        pairSelectionCount.textContent = selectedCount;
+        prepareMatchBtn.disabled = selectedCount === 0;
+      }
+
+      pairCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", updatePairSelection);
+      });
+
+      // Initial state
+      updatePairSelection();
+    }
+
+    function setupDetailModalTriggers() {
+      const detailButtons = document.querySelectorAll(".view-details-btn");
+      const modalBody = document.getElementById("detailsModalBody");
+      const modalTitle = document.getElementById("detailsModalLabel");
+      const detailsModal = new bootstrap.Modal(
+        document.getElementById("detailsModal")
+      );
+
+      detailButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const pairId = button.dataset.pairId;
+          const type = button.dataset.type; // 'patient' or 'donor'
+          const pair = allPairs.find((p) => p.pair_id === pairId);
+
+          if (pair) {
+            const data = pair[type];
+            if (data) {
+              modalTitle.textContent = `${
+                type === "patient" ? "Hasta" : "Donör"
+              } Detayları (Çift ID: ${pairId})`;
+              modalBody.innerHTML = getDetailContent(data, type);
+              detailsModal.show();
+            } else {
+              modalTitle.textContent = "Hata";
+              modalBody.innerHTML = "<p>İstenen veri bulunamadı.</p>";
+              detailsModal.show();
+            }
+          }
+        });
+      });
+    }
+
+    // --- Matching Logic (mostly unchanged, but uses data from selectedPairsData) ---
     function valueMatch(a, b) {
+      /* ... keep existing ... */
       if (!a || !b) return false;
       if (Array.isArray(a)) {
         if (Array.isArray(b)) return a.some((x) => b.includes(x));
@@ -355,136 +644,26 @@
         return a === b;
       }
     }
-
-    function displayCards(data, containerId, createCardFunction) {
-      const container = document.getElementById(containerId);
-      data.forEach((item) => {
-        const card = createCardFunction(item);
-        container.appendChild(card);
-      });
-    }
-
-    function setupSelectionHandlers() {
-      const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
-      const patientCheckboxes = document.querySelectorAll(".patient-checkbox");
-      const donorSelectionCount = document.getElementById(
-        "donor-selection-count"
-      );
-      const patientSelectionCount = document.getElementById(
-        "patient-selection-count"
-      );
-      const clearSelectionBtn = document.getElementById("clear-selection-btn");
-      const matchSelectedBtn = document.getElementById("match-selected-btn");
-
-      function updateSelectionCounts() {
-        const selectedDonors = document.querySelectorAll(
-          ".donor-checkbox:checked"
-        ).length;
-        const selectedPatients = document.querySelectorAll(
-          ".patient-checkbox:checked"
-        ).length;
-
-        donorSelectionCount.textContent = selectedDonors;
-        patientSelectionCount.textContent = selectedPatients;
-
-        matchSelectedBtn.disabled =
-          selectedDonors === 0 || selectedPatients === 0;
-      }
-
-      donorCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updateSelectionCounts);
-      });
-
-      patientCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updateSelectionCounts);
-      });
-
-      clearSelectionBtn.addEventListener("click", () => {
-        donorCheckboxes.forEach((checkbox) => (checkbox.checked = false));
-        patientCheckboxes.forEach((checkbox) => (checkbox.checked = false));
-        updateSelectionCounts();
-        clearArrows();
-      });
-
-      matchSelectedBtn.addEventListener("click", () => {
-        const selectedDonorIndices = Array.from(donorCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
-
-        const selectedPatientIndices = Array.from(patientCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
-
-        const selectedDonors = selectedDonorIndices.map(
-          (index) => donors[index]
-        );
-        const selectedPatients = selectedPatientIndices.map(
-          (index) => patients[index]
-        );
-
-        const donorIndexMap = selectedDonorIndices.reduce(
-          (map, selIndex, i) => {
-            map[i] = selIndex;
-            return map;
-          },
-          {}
-        );
-
-        const patientIndexMap = selectedPatientIndices.reduce(
-          (map, selIndex, i) => {
-            map[i] = selIndex;
-            return map;
-          },
-          {}
-        );
-
-        const matches = computeOptimalMatches(selectedDonors, selectedPatients);
-
-        const mappedMatches = matches.map((match) => ({
-          donorIndex: donorIndexMap[match.donorIndex],
-          patientIndex: patientIndexMap[match.patientIndex],
-        }));
-
-        const svg = createSVGOverlay();
-        drawMatchArrows(mappedMatches, svg);
-      });
-
-      updateSelectionCounts();
-    }
-
-    function clearArrows() {
-      const arrowsContainer = document.getElementById("arrows-container");
-      arrowsContainer.innerHTML = "";
-    }
-
-    function initTooltips() {
-      const tooltipTriggerList = [].slice.call(
-        document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      );
-      const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-          container: "body",
-          boundary: "window",
-          html: true,
-        });
-      });
-    }
-
     function canDonate(donor, patient) {
+      /* ... keep existing ... */
+      if (!donor || !patient) return false; // Add null check
+
       const organCompatibility = {
         A: ["A", "AB"],
         B: ["B", "AB"],
         AB: ["AB"],
         O: ["A", "B", "AB", "O"],
       };
-
-      const donorType = donor["blood-type"].replace(/ Rh[+-]/, "");
-      const patientType = patient["blood-type"].replace(/ Rh[+-]/, "");
-
-      if (!organCompatibility[donorType].includes(patientType)) {
+      const donorType = donor["blood-type"]?.replace(/ Rh[+-]/, ""); // Add safe navigation
+      const patientType = patient["blood-type"]?.replace(/ Rh[+-]/, ""); // Add safe navigation
+      if (
+        !donorType ||
+        !patientType ||
+        !organCompatibility[donorType]?.includes(patientType)
+      ) {
+        // Add safe navigation
         return false;
       }
-
       const directKeys = [
         "hla-a-antigen",
         "hla-b-antigen",
@@ -500,7 +679,6 @@
           return false;
         }
       }
-
       if (valueMatch(donor["hla-a-antigen"], patient["lsa1-A"])) return false;
       if (valueMatch(donor["hla-b-antigen"], patient["lsa1-B"])) return false;
       if (valueMatch(donor["hla-dr-antigen"], patient["lsa2-DRB1"]))
@@ -508,14 +686,13 @@
       if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQB1"]))
         return false;
       if (valueMatch(donor["hla-dq-antigen"], patient["lsa2-DQA1"]))
-        return false;
-
+        return false; // Ensure this key exists or handle it
       return true;
     }
-
     function findExchangeCycles(pairGraph) {
+      /* ... keep existing ... */
       const allCycles = [];
-      const maxCycleLength = 10;
+      const maxCycleLength = 10; // Keep or adjust as needed
 
       function findCyclesFrom(startNode, currentPath, visited) {
         const currentNode =
@@ -523,27 +700,29 @@
             ? currentPath[currentPath.length - 1]
             : startNode;
 
-        if (currentPath.length > 1 && currentNode === startNode) {
-          allCycles.push([...currentPath.slice(0, -1)]);
-          return;
+        // Check for direct cycle completion first
+        if (
+          pairGraph[currentNode] &&
+          pairGraph[currentNode].includes(startNode) &&
+          currentPath.length >= 1
+        ) {
+          allCycles.push([...currentPath, startNode]); // Add completed cycle
         }
 
         if (currentPath.length >= maxCycleLength) {
           return;
         }
 
-        for (const neighbor of pairGraph[currentNode]) {
-          if (neighbor === startNode && currentPath.length > 1) {
-            allCycles.push([...currentPath]);
-            continue;
-          }
-
-          if (!visited.has(neighbor)) {
-            visited.add(neighbor);
-            currentPath.push(neighbor);
-            findCyclesFrom(startNode, currentPath, visited);
-            currentPath.pop();
-            visited.delete(neighbor);
+        if (pairGraph[currentNode]) {
+          // Check if node exists in graph
+          for (const neighbor of pairGraph[currentNode]) {
+            if (!visited.has(neighbor)) {
+              visited.add(neighbor);
+              currentPath.push(neighbor);
+              findCyclesFrom(startNode, currentPath, visited);
+              currentPath.pop();
+              visited.delete(neighbor);
+            }
           }
         }
       }
@@ -553,125 +732,165 @@
         findCyclesFrom(startNode, [startNode], visited);
       }
 
+      // Filter and make cycles unique (A->B->A is same as B->A->B)
       const uniqueCycles = [];
       const cycleSignatures = new Set();
 
       for (const cycle of allCycles) {
-        if (cycle.length < 2) continue;
+        if (cycle.length < 3) continue; // Need at least 2 pairs for an exchange (A->B->A is length 3)
 
-        const sortedCycle = [...cycle].sort();
-        const cycleSignature = sortedCycle.join(",");
+        // Normalize cycle start point for signature generation
+        let minNode = cycle[0];
+        let minIndex = 0;
+        for (let i = 1; i < cycle.length - 1; i++) {
+          // Exclude last node which is startNode
+          if (cycle[i] < minNode) {
+            minNode = cycle[i];
+            minIndex = i;
+          }
+        }
+        const normalizedCycle = [
+          ...cycle.slice(minIndex, -1),
+          ...cycle.slice(0, minIndex),
+        ];
+
+        const cycleSignature = normalizedCycle.join("->");
 
         if (!cycleSignatures.has(cycleSignature)) {
           cycleSignatures.add(cycleSignature);
-          uniqueCycles.push(cycle);
+          // Store the cycle without the repeated start node at the end
+          uniqueCycles.push(cycle.slice(0, -1));
         }
       }
-
+      console.log("Unique Cycles Found:", uniqueCycles);
       return uniqueCycles;
     }
-
-    function computeOptimalMatches(donors, patients) {
-      const pairs = {};
-      donors.forEach((donor, i) => {
-        if (!pairs[donor.pair_id]) {
-          pairs[donor.pair_id] = { donorIndex: i, patientIndex: null };
-        } else {
-          pairs[donor.pair_id].donorIndex = i;
-        }
-      });
-
-      patients.forEach((patient, j) => {
-        if (!pairs[patient.pair_id]) {
-          pairs[patient.pair_id] = { donorIndex: null, patientIndex: j };
-        } else {
-          pairs[patient.pair_id].patientIndex = j;
-        }
-      });
-
-      const pairIds = Object.keys(pairs);
-      const pairGraph = {};
-
-      pairIds.forEach((pairId1) => {
-        pairGraph[pairId1] = [];
-        pairIds.forEach((pairId2) => {
-          if (pairId1 !== pairId2) {
-            const donor1 = donors[pairs[pairId1].donorIndex];
-            const patient2 = patients[pairs[pairId2].patientIndex];
-
-            if (canDonate(donor1, patient2)) {
-              pairGraph[pairId1].push(pairId2);
-            }
-          }
-        });
-      });
-
-      console.log("Possible pair exchanges:");
-      Object.keys(pairGraph).forEach((pairId1) => {
-        pairGraph[pairId1].forEach((pairId2) => {
-          console.log(
-            `Pair ${pairId1}'s donor can donate to Pair ${pairId2}'s patient`
-          );
-        });
-      });
-
-      const validCycles = findExchangeCycles(pairGraph);
-      console.log("Valid exchange cycles:", validCycles);
-
-      const selectedCycles = findOptimalCycleCombination(validCycles);
-
-      const matches = [];
-
-      for (const cycle of selectedCycles) {
-        for (let i = 0; i < cycle.length; i++) {
-          const givingPairId = cycle[i];
-          const receivingPairId = cycle[(i + 1) % cycle.length];
-
-          matches.push({
-            donorIndex: pairs[givingPairId].donorIndex,
-            patientIndex: pairs[receivingPairId].patientIndex,
-          });
-        }
-      }
-      return matches;
-    }
-
     function findOptimalCycleCombination(validCycles) {
-      validCycles.sort((a, b) => b.length - a.length);
+      /* ... keep existing ... */
+      validCycles.sort((a, b) => b.length - a.length); // Prioritize longer cycles
 
       const selectedCycles = [];
       const usedPairs = new Set();
 
       for (const cycle of validCycles) {
+        // Check if *any* pair in the current cycle is already used
         if (cycle.some((pairId) => usedPairs.has(pairId))) {
-          continue;
+          continue; // Skip this cycle if it conflicts
         }
+
+        // If no conflict, select this cycle and mark its pairs as used
         selectedCycles.push(cycle);
         for (const pairId of cycle) {
           usedPairs.add(pairId);
         }
       }
+      console.log("Optimal Selected Cycles:", selectedCycles);
       return selectedCycles;
     }
 
+    function computeOptimalMatches(currentPairsData) {
+      // Takes the currently displayed pairs' data
+      // Map pair_id to index within the currentPairsData array
+      const pairIdToIndexMap = currentPairsData.reduce((map, pair, index) => {
+        if (pair.pair_id) {
+          map[pair.pair_id] = index;
+        }
+        return map;
+      }, {});
+
+      const pairGraph = {};
+      currentPairsData.forEach((pair1, index1) => {
+        if (!pair1.pair_id || !pair1.donor) return; // Skip if missing essential info
+        pairGraph[pair1.pair_id] = [];
+
+        currentPairsData.forEach((pair2, index2) => {
+          if (index1 === index2 || !pair2.pair_id || !pair2.patient) return; // Skip self or missing info
+
+          if (canDonate(pair1.donor, pair2.patient)) {
+            pairGraph[pair1.pair_id].push(pair2.pair_id);
+          }
+        });
+      });
+
+      console.log("Possible pair exchanges for selected pairs:", pairGraph);
+
+      const validCycles = findExchangeCycles(pairGraph);
+      const selectedCycles = findOptimalCycleCombination(validCycles);
+
+      const matches = [];
+      for (const cycle of selectedCycles) {
+        for (let i = 0; i < cycle.length; i++) {
+          const givingPairId = cycle[i];
+          const receivingPairId = cycle[(i + 1) % cycle.length]; // Next pair in the cycle
+
+          // Find the indices within the currentPairsData array
+          const donorIndex = pairIdToIndexMap[givingPairId];
+          const patientIndex = pairIdToIndexMap[receivingPairId];
+
+          if (donorIndex !== undefined && patientIndex !== undefined) {
+            matches.push({
+              donorIndex: donorIndex, // Index within current display
+              patientIndex: patientIndex, // Index within current display
+            });
+          } else {
+            console.warn(
+              `Could not find indices for match: ${givingPairId} -> ${receivingPairId}`
+            );
+          }
+        }
+      }
+      console.log(
+        "Computed Matches (indices relate to displayed cards):",
+        matches
+      );
+      return matches;
+    }
+
+    // --- Arrow Drawing (mostly unchanged, uses indices from computeOptimalMatches) ---
+    function clearArrows() {
+      // Find the SVG overlay within the cards-wrapper and remove it
+      const existingSvg = document.querySelector(
+        ".cards-wrapper > svg.arrows-overlay"
+      );
+      if (existingSvg) {
+        existingSvg.remove();
+      }
+      currentMatches = []; // Clear stored matches when arrows are cleared
+    }
     function createSVGOverlay() {
-      const arrowsContainer = document.getElementById("arrows-container");
+      // Target the main wrapper now
+      const wrapper = document.querySelector(".cards-wrapper");
+      // Remove any existing overlay first (optional, clearArrows should handle it)
+      // const existingOverlay = wrapper.querySelector("svg.arrows-overlay");
+      // if (existingOverlay) {
+      //     existingOverlay.remove();
+      // }
+
       const arrowColor = getComputedStyle(document.documentElement)
         .getPropertyValue("--arrow-color")
         .trim();
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS, "svg");
-      svg.classList.add("arrows-overlay");
-      const wrapper = document.querySelector(".cards-wrapper");
+      svg.classList.add("arrows-overlay"); // Keep class for styling/selection
+
+      // Calculate SVG size based on the cards-wrapper
       const rect = wrapper.getBoundingClientRect();
-      svg.setAttribute("width", rect.width);
-      svg.setAttribute("height", rect.height);
+      // Use offsetWidth/Height which usually corresponds to the element's layout size
+      svg.setAttribute("width", wrapper.offsetWidth);
+      svg.setAttribute("height", wrapper.offsetHeight);
+      // Absolute positioning within the relative wrapper
+      svg.style.position = "absolute";
+      svg.style.top = "0";
+      svg.style.left = "0";
+      svg.style.pointerEvents = "none";
+      svg.style.zIndex = "1"; // Ensure it's above cards but below controls/tooltips
+
       const defs = document.createElementNS(svgNS, "defs");
       const marker = document.createElementNS(svgNS, "marker");
       marker.setAttribute("id", "arrowhead");
       marker.setAttribute("markerWidth", "10");
       marker.setAttribute("markerHeight", "7");
-      marker.setAttribute("refX", "10");
+      marker.setAttribute("refX", "10"); // Position arrowhead tip at the end point
       marker.setAttribute("refY", "3.5");
       marker.setAttribute("orient", "auto");
       const polygon = document.createElementNS(svgNS, "polygon");
@@ -680,13 +899,19 @@
       marker.appendChild(polygon);
       defs.appendChild(marker);
       svg.appendChild(defs);
-      arrowsContainer.innerHTML = "";
-      arrowsContainer.appendChild(svg);
+
+      // Append the SVG to the cards-wrapper
+      wrapper.appendChild(svg);
       return svg;
     }
 
     function drawMatchArrows(matches, svg) {
+      if (!svg) {
+        console.error("SVG element not provided for drawing arrows.");
+        return;
+      }
       const svgNS = "http://www.w3.org/2000/svg";
+      // Select cards *within the currently visible containers*
       const donorCards = document.querySelectorAll(
         "#donors-container .donor-card"
       );
@@ -697,20 +922,50 @@
         .getPropertyValue("--arrow-color")
         .trim();
 
+      // Get the bounding rectangle of the SVG container (which is the cards-wrapper)
+      const wrapper = document.querySelector(".cards-wrapper");
+      const wrapperRect = wrapper.getBoundingClientRect();
+
+      // Clear previous lines within the SVG if any
+      while (svg.lastChild && svg.lastChild.nodeName === "line") {
+        svg.removeChild(svg.lastChild);
+      }
+
       matches.forEach((match) => {
+        // Indices directly refer to the visible cards in their respective containers
         const donorCard = donorCards[match.donorIndex];
         const patientCard = patientCards[match.patientIndex];
 
+        if (!donorCard || !patientCard) {
+          console.warn("Could not find cards for match:", match);
+          return;
+        }
+
         const donorRect = donorCard.getBoundingClientRect();
         const patientRect = patientCard.getBoundingClientRect();
-        const wrapperRect = document
-          .querySelector(".cards-wrapper")
-          .getBoundingClientRect();
 
-        const startX = donorRect.left - wrapperRect.left;
-        const startY = donorRect.top + donorRect.height / 2 - wrapperRect.top;
-        const endX = patientRect.right - wrapperRect.left;
-        const endY = patientRect.top + patientRect.height / 2 - wrapperRect.top;
+        // Calculate coordinates relative to the viewport
+        const donorViewportX = donorRect.left + window.scrollX; // Use left edge of donor card (start)
+        const donorViewportY =
+          donorRect.top + donorRect.height / 2 + window.scrollY; // Center vertically
+        const patientViewportX = patientRect.right + window.scrollX; // Use right edge of patient card (end)
+        const patientViewportY =
+          patientRect.top + patientRect.height / 2 + window.scrollY; // Center vertically
+
+        // Convert viewport coordinates to SVG coordinates (relative to wrapper's top-left)
+        // The SVG overlay starts at wrapperRect.left, wrapperRect.top relative to viewport
+        const svgOriginX = wrapperRect.left + window.scrollX;
+        const svgOriginY = wrapperRect.top + window.scrollY;
+
+        let startX = donorViewportX - svgOriginX;
+        let startY = donorViewportY - svgOriginY;
+        let endX = patientViewportX - svgOriginX;
+        let endY = patientViewportY - svgOriginY;
+
+        // Add a small offset to prevent arrow head exactly touching the card edge (optional)
+        const offset = 5; // pixels
+        startX -= offset; // Move start point slightly left from donor card's left edge
+        endX += offset; // Move end point slightly right from patient card's right edge
 
         const line = document.createElementNS(svgNS, "line");
         line.setAttribute("x1", startX);
@@ -720,138 +975,287 @@
         line.setAttribute("stroke", arrowColor);
         line.setAttribute("stroke-width", "2");
         line.setAttribute("marker-end", "url(#arrowhead)");
+        line.style.strokeDasharray = "4 2"; // Apply dash from CSS if needed via JS
+        line.style.animation = "dash 15s linear infinite"; // Apply animation from CSS if needed via JS
+
         svg.appendChild(line);
       });
     }
 
-    function setupSelectionHandlers() {
-      const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
-      const patientCheckboxes = document.querySelectorAll(".patient-checkbox");
-      const donorSelectionCount = document.getElementById(
-        "donor-selection-count"
-      );
-      const patientSelectionCount = document.getElementById(
-        "patient-selection-count"
-      );
-      const clearSelectionBtn = document.getElementById("clear-selection-btn");
-      const matchSelectedBtn = document.getElementById("match-selected-btn");
-
-      function updateSelectionCounts() {
-        const selectedDonors = document.querySelectorAll(
-          ".donor-checkbox:checked"
-        ).length;
-        const selectedPatients = document.querySelectorAll(
-          ".patient-checkbox:checked"
-        ).length;
-
-        donorSelectionCount.textContent = selectedDonors;
-        patientSelectionCount.textContent = selectedPatients;
-
-        // Enable match button only if at least one donor and one patient are selected
-        matchSelectedBtn.disabled =
-          selectedDonors === 0 || selectedPatients === 0;
+    // --- Tooltip Initialization ---
+    function initTooltips() {
+      /* ... keep existing ... */
+      // Dispose existing tooltips first to prevent duplicates if called multiple times
+      const existingTooltips = bootstrap.Tooltip.getInstance(document.body); // Assuming container:'body'
+      if (existingTooltips) {
+        // This might not work as expected if multiple tooltips exist.
+        // It's better to track instances. Let's try querying and disposing individually.
+        document
+          .querySelectorAll('[data-bs-toggle="tooltip"]')
+          .forEach((el) => {
+            const instance = bootstrap.Tooltip.getInstance(el);
+            if (instance) {
+              instance.dispose();
+            }
+          });
       }
 
-      // Add event listeners to checkboxes
-      donorCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updateSelectionCounts);
+      const tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+          container: "body", // Keep container body to avoid complex boundary issues
+          boundary: "window",
+          html: true,
+          customClass: tooltipTriggerEl.dataset.bsCustomClass || "", // Use custom class if specified
+          trigger: "hover focus", // Show on hover or focus
+        });
       });
-
-      patientCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", updateSelectionCounts);
-      });
-
-      // Clear selection button
-      clearSelectionBtn.addEventListener("click", () => {
-        donorCheckboxes.forEach((checkbox) => (checkbox.checked = false));
-        patientCheckboxes.forEach((checkbox) => (checkbox.checked = false));
-        updateSelectionCounts();
-        clearArrows();
-      });
-
-      // Match selected button
-      matchSelectedBtn.addEventListener("click", () => {
-        const selectedDonorIndices = Array.from(donorCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
-
-        const selectedPatientIndices = Array.from(patientCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
-
-        const selectedDonors = selectedDonorIndices.map(
-          (index) => donors[index]
-        );
-        const selectedPatients = selectedPatientIndices.map(
-          (index) => patients[index]
-        );
-
-        // Create the mapping from selected indices to original indices
-        const donorIndexMap = selectedDonorIndices.reduce(
-          (map, selIndex, i) => {
-            map[i] = selIndex;
-            return map;
-          },
-          {}
-        );
-
-        const patientIndexMap = selectedPatientIndices.reduce(
-          (map, selIndex, i) => {
-            map[i] = selIndex;
-            return map;
-          },
-          {}
-        );
-
-        // Match only selected donors and patients
-        const matches = computeOptimalMatches(selectedDonors, selectedPatients);
-
-        // Map the selected indices back to the original indices
-        const mappedMatches = matches.map((match) => ({
-          donorIndex: donorIndexMap[match.donorIndex],
-          patientIndex: patientIndexMap[match.patientIndex],
-        }));
-
-        // Draw arrows for the matches
-        const svg = createSVGOverlay();
-        drawMatchArrows(mappedMatches, svg);
-      });
-
-      // Initialize button state
-      updateSelectionCounts();
     }
 
-    const donors = await fetchData("/db/get-donors", "donors");
-    const patients = await fetchData("/db/get-patients", "patients");
+    // --- Main Application Flow ---
+    function switchView(view) {
+      // 'list' or 'cards'
+      const pairListWrapper = document.querySelector(".pair-list-wrapper");
+      const cardsWrapper = document.querySelector(".cards-wrapper");
+      const prepareMatchBtn = document.getElementById("prepare-match-btn");
+      const runMatchBtn = document.getElementById("run-match-btn");
+      const backBtn = document.getElementById("back-to-list-btn");
+      const cardViewInfo = document.getElementById("card-view-info");
 
-    if (donors) displayCards(donors, "donors-container", createDonorCard);
-    if (patients)
-      displayCards(patients, "patients-container", createPatientCard);
+      if (view === "list") {
+        pairListWrapper.style.display = "block";
+        cardsWrapper.style.display = "none";
+        prepareMatchBtn.style.display = "inline-block";
+        runMatchBtn.style.display = "none";
+        backBtn.style.display = "none";
+        cardViewInfo.style.display = "none";
+        clearArrows(); // Clear arrows when going back to list
+      } else {
+        // view === 'cards'
+        pairListWrapper.style.display = "none";
+        cardsWrapper.style.display = "block"; // Show the wrapper
+        prepareMatchBtn.style.display = "none";
+        runMatchBtn.style.display = "inline-block";
+        runMatchBtn.disabled = false; // Enable match button initially
+        backBtn.style.display = "inline-block";
+        cardViewInfo.style.display = "flex"; // Show card view info header
+      }
+    }
 
-    initTooltips();
-    setupSelectionHandlers();
+    // --- NEW: Search Functionality ---
+    function initializeFuzzySearch(data) {
+      const options = {
+        // isCaseSensitive: false,
+        // includeScore: false,
+        // shouldSort: true,
+        // includeMatches: false,
+        // findAllMatches: false,
+        minMatchCharLength: 2, // Don't search for single characters
+        // location: 0,
+        threshold: 0.3, // Adjust for desired fuzziness (0=exact, 1=anything)
+        // distance: 100,
+        // useExtendedSearch: false,
+        ignoreLocation: true, // Search anywhere in the string
+        // ignoreFieldNorm: false,
+        // fieldNormWeight: 1,
+        keys: [
+          "patient.name",
+          "patient.surname",
+          "donor.name",
+          "donor.surname",
+        ],
+      };
+      fuseInstance = new Fuse(data, options);
+      console.log("Fuse.js initialized");
+    }
 
-    window.addEventListener("resize", () => {
-      if (document.querySelector("#arrows-container svg")) {
-        const svg = createSVGOverlay();
-        const donorCheckboxes = document.querySelectorAll(".donor-checkbox");
-        const patientCheckboxes =
-          document.querySelectorAll(".patient-checkbox");
+    function handleSearch() {
+      if (!fuseInstance) return; // Don't search if Fuse isn't ready
 
-        const selectedDonorIndices = Array.from(donorCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
+      const searchTerm = document
+        .getElementById("pair-search-input")
+        .value.trim();
 
-        const selectedPatientIndices = Array.from(patientCheckboxes)
-          .map((checkbox, index) => (checkbox.checked ? index : -1))
-          .filter((index) => index !== -1);
+      if (searchTerm.length === 0) {
+        displayPairList(allPairs); // Show all if search is empty
+      } else {
+        const results = fuseInstance.search(searchTerm);
+        // Fuse returns objects like { item: pairData, refIndex: ..., score: ... }
+        // We just need the 'item' for display
+        displayPairList(results.map((result) => result.item));
+      }
+    }
 
-        if (
-          selectedDonorIndices.length > 0 &&
-          selectedPatientIndices.length > 0
-        ) {
-          document.getElementById("match-selected-btn").click();
+    // Debounce function
+    function debounce(func, wait) {
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(searchDebounceTimer);
+          func(...args);
+        };
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(later, wait);
+      };
+    }
+
+    // Attach debounced search handler
+    const debouncedSearch = debounce(handleSearch, 300); // Wait 300ms after last keystroke
+
+    document
+      .getElementById("pair-search-input")
+      .addEventListener("input", debouncedSearch);
+
+    // --- Event Listeners for Buttons ---
+    document
+      .getElementById("clear-selection-btn")
+      .addEventListener("click", () => {
+        document
+          .querySelectorAll(".pair-checkbox:checked")
+          .forEach((cb) => (cb.checked = false));
+        setupPairSelectionHandlers(); // Update counts and button state
+        // If in card view, this button might need different logic, but for now, it clears pair list selection
+        if (document.querySelector(".cards-wrapper").style.display !== "none") {
+          // Maybe go back to list view? Or just clear arrows?
+          clearArrows();
+          // Decide if you want to clear the cards view too or just the arrows.
+          // For now, just clear arrows. User can go back manually.
         }
+      });
+
+    document
+      .getElementById("prepare-match-btn")
+      .addEventListener("click", () => {
+        const selectedCheckboxes = document.querySelectorAll(
+          ".pair-checkbox:checked"
+        );
+        const selectedPairIds = Array.from(selectedCheckboxes).map(
+          (cb) => cb.dataset.pairId
+        );
+
+        const pairsToDisplay = allPairs.filter((p) =>
+          selectedPairIds.includes(p.pair_id)
+        );
+
+        if (pairsToDisplay.length > 0) {
+          displaySelectedCards(pairsToDisplay);
+          switchView("cards");
+        } else {
+          alert("Lütfen eşleştirme için en az bir çift seçin.");
+        }
+      });
+
+    document.getElementById("run-match-btn").addEventListener("click", () => {
+      const runMatchBtn = document.getElementById("run-match-btn");
+      runMatchBtn.disabled = true; // Disable button
+
+      clearArrows(); // Clear previous arrows and stored matches
+
+      // Ensure SVG overlay exists and is sized correctly *before* drawing
+      // createSVGOverlay will remove old one if exists and create a new one
+      const svg = createSVGOverlay();
+
+      // Run matching on the data currently displayed (stored in selectedPairsData)
+      const matches = computeOptimalMatches(selectedPairsData);
+      currentMatches = matches; // Store matches for potential redraw
+
+      if (matches.length > 0) {
+        // Delay drawing slightly to ensure layout is stable after potential SVG creation/resizing
+        requestAnimationFrame(() => {
+          drawMatchArrows(matches, svg);
+        });
+      } else {
+        alert("Seçilen çiftler arasında uygun eşleşme bulunamadı.");
+        // Re-enable button only if no matches found? Or keep disabled?
+        // runMatchBtn.disabled = false; // Decide if re-enabling is desired
+      }
+      // Keep button disabled generally after running match
+    });
+    document
+      .getElementById("back-to-list-btn")
+      .addEventListener("click", () => {
+        switchView("list");
+        // Optionally re-enable prepare button if selection still exists?
+        setupPairSelectionHandlers(); // Update button state based on list selection
+      });
+
+    // --- Initialization ---
+    async function initializeApp() {
+      allDonors = await fetchData("/db/get-donors", "donors");
+      allPatients = await fetchData("/db/get-patients", "patients");
+
+      if (allDonors && allPatients) {
+        const patientMap = allPatients.reduce((map, patient, index) => {
+          if (patient.pair_id)
+            map[patient.pair_id] = { data: patient, index: index };
+          return map;
+        }, {});
+        const donorMap = allDonors.reduce((map, donor, index) => {
+          if (donor.pair_id) map[donor.pair_id] = { data: donor, index: index };
+          return map;
+        }, {});
+        const allPairIds = new Set([
+          ...Object.keys(patientMap),
+          ...Object.keys(donorMap),
+        ]);
+
+        allPairs = Array.from(allPairIds)
+          .map((pairId) => ({
+            pair_id: pairId, // Keep the ID internally
+            patient: patientMap[pairId]?.data || null,
+            donor: donorMap[pairId]?.data || null,
+            patientIndex: patientMap[pairId]?.index ?? -1,
+            donorIndex: donorMap[pairId]?.index ?? -1,
+          }))
+          .sort((a, b) => {
+            // Sort primarily by patient name, then donor name if patient missing
+            const nameA = a.patient
+              ? `${a.patient.name} ${a.patient.surname}`
+              : a.donor
+              ? `${a.donor.name} ${a.donor.surname}`
+              : "";
+            const nameB = b.patient
+              ? `${b.patient.name} ${b.patient.surname}`
+              : b.donor
+              ? `${b.donor.name} ${b.donor.surname}`
+              : "";
+            return nameA.localeCompare(nameB);
+          });
+
+        displayPairList(allPairs); // Display the initial full list
+        initializeFuzzySearch(allPairs); // Initialize Fuse.js with the full data
+        switchView("list");
+      } else {
+        document.getElementById("pair-list-container").innerHTML =
+          "<p class='text-danger'>Hasta veya donör verileri yüklenemedi.</p>";
+      }
+    }
+
+    initializeApp(); // Start the app
+    // Handle resize - redraw arrows if in card view
+    window.addEventListener("resize", () => {
+      // Check if we are in the card view and if there are matches to draw
+      if (
+        document.querySelector(".cards-wrapper").style.display !== "none" &&
+        currentMatches.length > 0
+      ) {
+        console.log("Resize detected, redrawing arrows.");
+        // Clear existing arrows first
+        clearArrows();
+        // Recreate SVG overlay (handles resizing)
+        const svg = createSVGOverlay();
+        // Redraw arrows using the stored matches
+        // Delay drawing slightly to allow layout reflow after resize
+        requestAnimationFrame(() => {
+          // Ensure SVG still exists (user might have navigated away quickly)
+          const currentSvg = document.querySelector(
+            ".cards-wrapper > svg.arrows-overlay"
+          );
+          if (currentSvg) {
+            drawMatchArrows(currentMatches, currentSvg);
+          }
+        });
       }
     });
   });

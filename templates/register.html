@@ -1,0 +1,159 @@
+{% extends "rebase.html" %} {% block title %}Register{% endblock %} {% block
+page_content %}
+<div class="container">
+  <div class="row min-vh-100 flex-center g-0">
+    <div class="col-lg-8 col-xxl-5 py-3 position-relative">
+      <div class="card overflow-hidden z-index-1">
+        <div class="card-body p-0">
+          <div class="row g-0 h-100">
+            <div class=" d-flex flex-center">
+              <div class="p-4 p-md-5 flex-grow-1">
+                <div class="row flex-between-center">
+                  <div class="col-auto">
+                    <h3>Kayıt ol</h3>
+                  </div>
+                </div>
+
+                <div id="alert-container"></div>
+
+                <form id="register-form">
+                  <div class="mb-3">
+                    <label class="form-label" for="username">Kullanıcı Adı</label>
+                    <input
+                      class="form-control"
+                      id="username"
+                      name="username"
+                      type="text"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="password">Şifre</label>
+                    <input
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label" for="password_again"
+                      >Şifreyi Onayla</label
+                    >
+                    <input
+                      class="form-control"
+                      id="password_again"
+                      name="password_again"
+                      type="password"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <button
+                      class="btn btn-primary d-block w-100 mt-3"
+                      type="submit"
+                      id="register-button"
+                    >
+                      Kayıt Ol
+                      <span
+                        class="spinner-border spinner-border-sm ms-2 d-none"
+                        id="register-spinner"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                    </button>
+                  </div>
+                </form>
+                <div class="text-center">
+                  <p class="fs--1 text-600">
+                    Hesabınız zaten var mı?
+                    <a href="{{ url_for('website.login') }}">Giriş yap</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const registerForm = document.getElementById("register-form");
+    const alertContainer = document.getElementById("alert-container");
+    const registerButton = document.getElementById("register-button");
+    const registerSpinner = document.getElementById("register-spinner");
+
+    registerForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Show loading state
+      registerButton.disabled = true;
+      registerSpinner.classList.remove("d-none");
+
+      // Clear previous alerts
+      alertContainer.innerHTML = "";
+
+      // Client-side validation
+      const password = document.getElementById("password").value;
+      const passwordAgain = document.getElementById("password_again").value;
+
+      if (password !== passwordAgain) {
+        showAlert("danger", "Passwords do not match");
+        registerButton.disabled = false;
+        registerSpinner.classList.add("d-none");
+        return;
+      }
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("username", document.getElementById("username").value);
+      formData.append("password", password);
+      formData.append("password_again", passwordAgain);
+
+      // Send AJAX request
+      fetch("/db/registeruser", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status) {
+            // Success
+            showAlert("success", data.message);
+            // Redirect to login or dashboard after a brief delay
+            setTimeout(() => {
+              window.location.href = "{{ url_for('website.index') }}";
+            }, 1500);
+          } else {
+            // Show error message
+            showAlert("danger", data.message);
+          }
+        })
+        .catch((error) => {
+          showAlert("danger", "An error occurred. Please try again.");
+          console.error("Error:", error);
+        })
+        .finally(() => {
+          // Reset button state
+          registerButton.disabled = false;
+          registerSpinner.classList.add("d-none");
+        });
+    });
+
+    function showAlert(type, message) {
+      const alert = document.createElement("div");
+      alert.className = `alert alert-${type} alert-dismissible fade show`;
+      alert.role = "alert";
+      alert.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+      alertContainer.appendChild(alert);
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "rebase.html" %}
+{% block navbar %}
+{% endblock %}
+{% block page_content %}
+<div class="container">
+  <div class="row min-vh-100 flex-center g-0">
+    <div class="col-lg-8 col-xxl-5 py-3 position-relative">
+      <div class="card overflow-hidden z-index-1">
+        <div class="card-body p-0">
+          <div class="row g-0 h-100">
+            <div class=" d-flex flex-center">
+              <div class="p-4 p-md-5 flex-grow-1">
+                <div class="row flex-between-center">
+                  <div class="col-auto">
+                    <h3>Giriş Yap</h3>
+                  </div>
+                </div>
+                
+                <div id="alert-container"></div>
+                
+                <form id="login-form">
+                  <div class="mb-3">
+                    <label class="form-label" for="username">Kullanıcı Adı</label>
+                    <input class="form-control" id="username" name="username" type="text" required />
+                  </div>
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <label class="form-label" for="password">Şifre</label>
+                    </div>
+                    <input class="form-control" id="password" name="password" type="password" required />
+                  </div>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="remember" name="remember" />
+                    <label class="form-check-label" for="remember">Beni hatırla</label>
+                  </div>
+                  <div class="mb-3">
+                    <button class="btn btn-primary d-block w-100 mt-3" type="submit" id="login-button">
+                      Giriş Yap
+                      <span class="spinner-border spinner-border-sm ms-2 d-none" id="login-spinner" role="status" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const loginForm = document.getElementById('login-form');
+  const alertContainer = document.getElementById('alert-container');
+  const loginButton = document.getElementById('login-button');
+  const loginSpinner = document.getElementById('login-spinner');
+  
+  loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    loginButton.disabled = true;
+    loginSpinner.classList.remove('d-none');
+    
+    // Clear previous alerts
+    alertContainer.innerHTML = '';
+    
+    // Get form data
+    const formData = {
+      username: document.getElementById('username').value,
+      password: document.getElementById('password').value,
+      remember: document.getElementById('remember').checked
+    };
+    
+    // Send AJAX request
+    fetch('/db/loginuser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status) {
+        // Success - redirect
+        window.location.href = data.redirect;
+      } else {
+        // Show error message
+        showAlert('danger', data.message);
+      }
+    })
+    .catch(error => {
+      showAlert('danger', 'An error occurred. Please try again.');
+      console.error('Error:', error);
+    })
+    .finally(() => {
+      // Reset button state
+      loginButton.disabled = false;
+      loginSpinner.classList.add('d-none');
+    });
+  });
+  
+  function showAlert(type, message) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alert);
+  }
+});
+</script>
+{% endblock %}
